@@ -32,6 +32,16 @@ export function createHunt({ name, currency, startBalance }) {
     startBalance: Number(startBalance) || 0,
     createdAt: Date.now(),
     entries: [],
+    participants: [],
+  }
+}
+
+export function createParticipant({ name, amount, paidBy }) {
+  return {
+    id: newId(),
+    name: name || 'Ktoś',
+    amount: Number(amount) || 0,
+    paidBy: paidBy || null,
   }
 }
 

@@ -27,6 +27,32 @@ export function huntStats(hunt) {
   }
 }
 
+export function splitPayouts(participants = [], totalWin = 0) {
+  const totalIn = participants.reduce((s, p) => s + (Number(p.amount) || 0), 0)
+  const rows = participants.map((p) => {
+    const amount = Number(p.amount) || 0
+    const share = totalIn > 0 ? amount / totalIn : 0
+    return { ...p, amount, share, gross: totalWin * share, debts: [], credits: [] }
+  })
+  const byId = new Map(rows.map((r) => [r.id, r]))
+
+  // ktoś wpłacił wkład za kogoś innego — ten ktoś oddaje mu tę kwotę z wypłaty
+  rows.forEach((r) => {
+    const payer = r.paidBy && r.paidBy !== r.id ? byId.get(r.paidBy) : null
+    if (!payer || r.amount === 0) return
+    r.debts.push({ id: payer.id, name: payer.name, amount: r.amount })
+    payer.credits.push({ id: r.id, name: r.name, amount: r.amount })
+  })
+
+  rows.forEach((r) => {
+    const owes = r.debts.reduce((s, d) => s + d.amount, 0)
+    const owed = r.credits.reduce((s, c) => s + c.amount, 0)
+    r.net = r.gross - owes + owed
+  })
+
+  return { totalIn, totalWin, rows }
+}
+
 export function entryMultiplier(entry) {
   if (!entry.opened || !entry.bet) return null
   return (Number(entry.win) || 0) / Number(entry.bet)

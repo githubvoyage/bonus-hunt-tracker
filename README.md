@@ -60,6 +60,11 @@ Once you're in Claude Code, some good next prompts to keep vibe-coding:
 - **Break-even multiplier** = (start balance − total win so far) ÷ (sum of
   bets on unopened slots). It's the average multiplier you need across the
   remaining slots to walk away even.
+- **Split between players** — each player's share = their contribution ÷ sum
+  of all contributions, paid out of the current total win. If someone else
+  deposited a player's contribution for them, that amount moves from the
+  player's payout to whoever paid. Example: Michał 20, Czesław 40, win 600 →
+  200 / 400; if Czesław paid Michał's 20 as well → 180 / 420.
 
 ## Project structure
 

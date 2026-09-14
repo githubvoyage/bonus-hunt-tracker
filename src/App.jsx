@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadHunts, saveHunts, createHunt, createEntry } from './storage.js'
-import { huntStats } from './calc.js'
+import { loadHunts, saveHunts, createHunt, createEntry, createParticipant } from './storage.js'
+import { huntStats, splitPayouts } from './calc.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntForm from './components/NewHuntForm.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
+import ParticipantsPanel from './components/ParticipantsPanel.jsx'
 
 export default function App() {
   const [hunts, setHunts] = useState([])
@@ -28,6 +29,10 @@ export default function App() {
 
   const activeHunt = useMemo(() => hunts.find((h) => h.id === activeId) || null, [hunts, activeId])
   const stats = useMemo(() => (activeHunt ? huntStats(activeHunt) : null), [activeHunt])
+  const split = useMemo(
+    () => (activeHunt && stats ? splitPayouts(activeHunt.participants, stats.totalWin) : null),
+    [activeHunt, stats]
+  )
 
   function updateActiveHunt(mutate) {
     setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
@@ -78,6 +83,31 @@ export default function App() {
     }))
   }
 
+  function handleAddParticipant({ name, amount, paidBy }) {
+    const participant = createParticipant({ name, amount, paidBy })
+    updateActiveHunt((h) => ({ ...h, participants: [...(h.participants || []), participant] }))
+  }
+
+  function handleUpdateParticipant(id, patch) {
+    updateActiveHunt((h) => ({
+      ...h,
+      participants: (h.participants || []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
+    }))
+  }
+
+  function handleRemoveParticipant(id) {
+    updateActiveHunt((h) => ({
+      ...h,
+      participants: (h.participants || [])
+        .filter((p) => p.id !== id)
+        .map((p) => (p.paidBy === id ? { ...p, paidBy: null } : p)),
+    }))
+  }
+
+  function handleSetStartBalance(value) {
+    updateActiveHunt((h) => ({ ...h, startBalance: Number(value) || 0 }))
+  }
+
   function handleExport() {
     if (!activeHunt) return
     const rows = [['#', 'Slot', 'Bet', 'Wygrana', 'Multi']]
@@ -118,6 +148,14 @@ export default function App() {
         {activeHunt && stats && (
           <>
             <SummaryBar hunt={activeHunt} stats={stats} />
+            <ParticipantsPanel
+              hunt={activeHunt}
+              split={split}
+              onAdd={handleAddParticipant}
+              onUpdate={handleUpdateParticipant}
+              onRemove={handleRemoveParticipant}
+              onSetStartBalance={handleSetStartBalance}
+            />
             <AddEntryForm onAdd={handleAddEntry} />
             <EntryTable
               entries={activeHunt.entries}
