@@ -4,7 +4,8 @@ import { entryMultiplier, formatMoney, formatMult } from '../calc.js'
 function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   const [winInput, setWinInput] = useState('')
   const mult = entryMultiplier(entry)
-  const highMult = mult !== null && mult >= 10
+  const mega = mult !== null && mult >= 50
+  const banger = mult !== null && mult >= 10 && !mega
 
   function submitWin(e) {
     e.preventDefault()
@@ -14,47 +15,69 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   }
 
   return (
-    <tr className={`border-b border-felt-line/60 ${entry.opened ? 'row-settle' : ''}`}>
-      <td className="py-2 pl-1 text-muted">{index + 1}</td>
-      <td className="py-2 pr-3">
-        <div className="text-cream">{entry.name}</div>
+    <tr
+      className={`border-b border-line/50 transition-colors hover:bg-bg-raised/50 ${
+        entry.opened ? 'row-settle' : ''
+      } ${mega ? 'bg-pink/10' : banger ? 'bg-gold/5' : ''}`}
+    >
+      <td className="py-3 pl-3 font-mono text-xs text-muted">
+        {String(index + 1).padStart(2, '0')}
       </td>
-      <td className="py-2 pr-3 text-right font-mono text-cream">
+
+      <td className="py-3 pr-3">
+        <div className="font-semibold text-cream">{entry.name}</div>
+        {mega && (
+          <div className="font-display text-[10px] uppercase tracking-wider text-pink neon-pink">
+            🔥 Mega banger
+          </div>
+        )}
+      </td>
+
+      <td className="py-3 pr-3 text-right font-mono text-cream">
         {formatMoney(entry.bet, currency)}
       </td>
-      <td className="py-2 pr-3 text-right font-mono">
+
+      <td className="py-3 pr-3 text-right font-mono">
         {entry.opened ? (
           <button
             onClick={() => onReopen(entry.id)}
-            className="text-cream underline decoration-dotted hover:text-gold"
-            title="Click to edit"
+            className="font-semibold text-cream underline decoration-dotted underline-offset-4 transition-colors hover:text-gold"
+            title="Kliknij, żeby poprawić"
           >
             {formatMoney(entry.win, currency)}
           </button>
         ) : (
-          <form onSubmit={submitWin} className="flex justify-end gap-1">
+          <form onSubmit={submitWin} className="flex justify-end">
             <input
               value={winInput}
               onChange={(e) => setWinInput(e.target.value)}
               inputMode="decimal"
-              placeholder="win"
-              className="w-20 rounded-sm border border-felt-line bg-felt px-1.5 py-1 text-right font-mono text-cream placeholder:text-muted/50"
+              placeholder="wygrana"
+              className="w-24 rounded-lg border border-line bg-bg-deep px-2 py-1.5 text-right font-mono text-cream transition-colors placeholder:text-muted/40 focus:border-win"
             />
           </form>
         )}
       </td>
+
       <td
-        className={`py-2 pr-3 text-right font-mono ${
-          highMult ? 'text-gold-bright font-medium' : 'text-cream'
+        className={`py-3 pr-3 text-right font-mono font-bold ${
+          mega
+            ? 'text-pink neon-pink'
+            : banger
+            ? 'text-gold neon-gold'
+            : mult !== null
+            ? 'text-cream'
+            : 'text-muted'
         }`}
       >
         {formatMult(mult)}
       </td>
-      <td className="py-2 pl-2 text-right">
+
+      <td className="py-3 pl-2 pr-3 text-right">
         <button
           onClick={() => onDelete(entry.id)}
-          className="text-muted hover:text-danger"
-          title="Remove slot"
+          className="text-muted transition-colors hover:text-loss"
+          title="Usuń slota"
         >
           ✕
         </button>
@@ -63,7 +86,14 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   )
 }
 
-export default function EntryTable({ entries, currency, onRecordWin, onDelete, onReopen, sortByMultiplier }) {
+export default function EntryTable({
+  entries,
+  currency,
+  onRecordWin,
+  onDelete,
+  onReopen,
+  sortByMultiplier,
+}) {
   const sorted = sortByMultiplier
     ? [...entries].sort((a, b) => {
         const ma = entryMultiplier(a)
@@ -77,37 +107,43 @@ export default function EntryTable({ entries, currency, onRecordWin, onDelete, o
 
   if (entries.length === 0) {
     return (
-      <div className="border border-felt-line px-5 py-10 text-center text-muted">
-        No slots yet — add the first one above to start the hunt.
+      <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
+        <div className="mb-3 text-4xl">🎲</div>
+        <p className="font-display text-sm uppercase tracking-wider text-muted">
+          Pusto jak w portfelu
+        </p>
+        <p className="mt-2 text-sm text-muted/70">Dorzuć pierwszego slota wyżej i jedziemy.</p>
       </div>
     )
   }
 
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="text-left text-xs uppercase tracking-wide text-muted">
-          <th className="pb-2 pl-1">#</th>
-          <th className="pb-2 pr-3">Slot</th>
-          <th className="pb-2 pr-3 text-right">Bet</th>
-          <th className="pb-2 pr-3 text-right">Win</th>
-          <th className="pb-2 pr-3 text-right">Multi</th>
-          <th className="pb-2"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map((entry, i) => (
-          <Row
-            key={entry.id}
-            entry={entry}
-            currency={currency}
-            index={i}
-            onRecordWin={onRecordWin}
-            onDelete={onDelete}
-            onReopen={onReopen}
-          />
-        ))}
-      </tbody>
-    </table>
+    <div className="overflow-x-auto rounded-2xl border border-line bg-bg-panel/60 shadow-panel">
+      <table className="w-full min-w-[520px] text-sm">
+        <thead>
+          <tr className="border-b border-line bg-bg-deep/60 text-left font-display text-[10px] uppercase tracking-wider text-muted">
+            <th className="py-3 pl-3">#</th>
+            <th className="py-3 pr-3">Slot</th>
+            <th className="py-3 pr-3 text-right">Bet</th>
+            <th className="py-3 pr-3 text-right">Wygrana</th>
+            <th className="py-3 pr-3 text-right">Multi</th>
+            <th className="py-3 pr-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((entry, i) => (
+            <Row
+              key={entry.id}
+              entry={entry}
+              currency={currency}
+              index={i}
+              onRecordWin={onRecordWin}
+              onDelete={onDelete}
+              onReopen={onReopen}
+            />
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

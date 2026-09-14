@@ -1,16 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  background-color: #0B2B22;
+html,
+body {
+  background-color: #07040f;
 }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  color: #F1E9D8;
+  color: #f5edff;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 12% 6%, rgba(255, 46, 136, 0.18), transparent 42%),
+    radial-gradient(circle at 88% 2%, rgba(34, 228, 255, 0.14), transparent 40%),
+    radial-gradient(circle at 50% 104%, rgba(168, 85, 247, 0.2), transparent 55%);
+  background-attachment: fixed;
 }
 
 .font-tabular {
@@ -18,17 +25,105 @@ body {
   font-feature-settings: 'tnum';
 }
 
-/* one deliberate motion: a settling flip when a slot result lands */
-@keyframes settle {
-  0% { transform: translateY(-6px) scaleY(0.96); opacity: 0.4; }
-  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+/* ---------- neonowe świecidełka ---------- */
+.neon-gold {
+  text-shadow: 0 0 8px rgba(255, 197, 49, 0.75), 0 0 26px rgba(255, 197, 49, 0.4);
 }
-.row-settle {
-  animation: settle 240ms ease-out;
+.neon-pink {
+  text-shadow: 0 0 8px rgba(255, 46, 136, 0.8), 0 0 26px rgba(255, 46, 136, 0.45);
+}
+.neon-win {
+  text-shadow: 0 0 8px rgba(0, 255, 163, 0.8), 0 0 26px rgba(0, 255, 163, 0.4);
+}
+.neon-loss {
+  text-shadow: 0 0 8px rgba(255, 67, 101, 0.8), 0 0 26px rgba(255, 67, 101, 0.4);
 }
 
-/* focus visibility */
+/* ramka w gradiencie — kasyno vibe */
+.gradient-frame {
+  position: relative;
+  background:
+    linear-gradient(#1b1035, #1b1035) padding-box,
+    linear-gradient(120deg, #ff2e88, #ffc531, #22e4ff, #a855f7) border-box;
+  border: 1px solid transparent;
+}
+
+/* ---------- animacje ---------- */
+@keyframes settle {
+  0% {
+    transform: translateY(-8px) scaleY(0.94);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+.row-settle {
+  animation: settle 260ms ease-out;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.btn-jazda {
+  background-image: linear-gradient(100deg, #ff2e88, #ffc531, #ff2e88, #ffc531);
+  background-size: 200% 100%;
+  animation: shimmer 2.6s linear infinite;
+}
+.btn-jazda:hover {
+  animation-duration: 1.1s;
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 197, 49, 0.45), 0 0 26px rgba(255, 197, 49, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(255, 197, 49, 0.8), 0 0 44px rgba(255, 197, 49, 0.35);
+  }
+}
+.pulse-glow {
+  animation: pulseGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.blink {
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+/* ---------- pasek przewijania ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #120a24;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a2166;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5b33a0;
+}
+
+/* ---------- focus ---------- */
 :focus-visible {
-  outline: 2px solid #C9A227;
+  outline: 2px solid #ffc531;
   outline-offset: 2px;
 }

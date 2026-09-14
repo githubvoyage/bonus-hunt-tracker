@@ -7,7 +7,7 @@ export function loadHunts() {
     const parsed = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed : []
   } catch (e) {
-    console.error('Failed to load hunts', e)
+    console.error('Nie udało się wczytać huntów', e)
     return []
   }
 }
@@ -16,7 +16,7 @@ export function saveHunts(hunts) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(hunts))
   } catch (e) {
-    console.error('Failed to save hunts', e)
+    console.error('Nie udało się zapisać huntów', e)
   }
 }
 
@@ -27,7 +27,7 @@ export function newId() {
 export function createHunt({ name, currency, startBalance }) {
   return {
     id: newId(),
-    name: name || 'Untitled hunt',
+    name: name || 'Jebanka po wypłacie',
     currency: currency || '€',
     startBalance: Number(startBalance) || 0,
     createdAt: Date.now(),
@@ -38,7 +38,7 @@ export function createHunt({ name, currency, startBalance }) {
 export function createEntry({ name, bet }) {
   return {
     id: newId(),
-    name: name || 'Unnamed slot',
+    name: name || 'Slot bez nazwy',
     bet: Number(bet) || 0,
     win: null,
     opened: false,

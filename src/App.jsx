@@ -30,9 +30,7 @@ export default function App() {
   const stats = useMemo(() => (activeHunt ? huntStats(activeHunt) : null), [activeHunt])
 
   function updateActiveHunt(mutate) {
-    setHunts((prev) =>
-      prev.map((h) => (h.id === activeId ? mutate(h) : h))
-    )
+    setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
   }
 
   function handleCreateHunt({ name, currency, startBalance }) {
@@ -43,7 +41,7 @@ export default function App() {
   }
 
   function handleDeleteHunt(id) {
-    if (!confirm('Delete this hunt? This cannot be undone.')) return
+    if (!confirm('Usunąć tego hunta? Nie ma odwrotu.')) return
     setHunts((prev) => {
       const next = prev.filter((h) => h.id !== id)
       if (next.length > 0) setActiveId(next[0].id)
@@ -82,13 +80,13 @@ export default function App() {
 
   function handleExport() {
     if (!activeHunt) return
-    const rows = [['#', 'Slot', 'Bet', 'Win', 'Multiplier']]
+    const rows = [['#', 'Slot', 'Bet', 'Wygrana', 'Multi']]
     activeHunt.entries.forEach((e, i) => {
       const mult = e.opened && e.bet ? (e.win / e.bet).toFixed(2) : ''
       rows.push([i + 1, e.name, e.bet, e.opened ? e.win : '', mult])
     })
     const csv = rows.map((r) => r.map((v) => `"${v}"`).join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv' })
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -100,8 +98,8 @@ export default function App() {
   if (!loaded) return null
 
   return (
-    <div className="min-h-screen bg-felt px-4 py-6 md:px-10 md:py-8">
-      <div className="mx-auto max-w-4xl space-y-5">
+    <div className="min-h-screen px-4 py-6 md:px-10 md:py-8">
+      <div className="mx-auto max-w-5xl space-y-6">
         <HuntHeader
           hunts={hunts}
           activeId={activeId}
@@ -114,10 +112,7 @@ export default function App() {
         />
 
         {showNewForm && (
-          <NewHuntForm
-            onCreate={handleCreateHunt}
-            onCancel={() => setShowNewForm(false)}
-          />
+          <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
         )}
 
         {activeHunt && stats && (
@@ -136,8 +131,12 @@ export default function App() {
         )}
 
         {!activeHunt && !showNewForm && (
-          <div className="border border-felt-line px-5 py-10 text-center text-muted">
-            No hunt selected. Start a new one to begin tracking.
+          <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
+            <div className="mb-3 text-4xl">🎰</div>
+            <p className="font-display text-sm uppercase tracking-wider text-muted">
+              Nie ma żadnego hunta
+            </p>
+            <p className="mt-2 text-sm text-muted/70">Odpal nowy i lecimy.</p>
           </div>
         )}
       </div>

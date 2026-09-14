@@ -1,46 +1,83 @@
 import { formatMoney, formatMult } from '../calc.js'
 
-function Stat({ label, value, tone }) {
+function Stat({ label, value, tone, big }) {
   const toneClass =
-    tone === 'positive'
-      ? 'text-positive'
-      : tone === 'danger'
-      ? 'text-danger'
+    tone === 'win'
+      ? 'text-win neon-win'
+      : tone === 'loss'
+      ? 'text-loss neon-loss'
+      : tone === 'gold'
+      ? 'text-gold neon-gold'
       : 'text-cream'
+
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs uppercase tracking-wide text-muted">{label}</span>
-      <span className={`font-mono text-xl md:text-2xl ${toneClass}`}>{value}</span>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold uppercase tracking-wider text-muted">{label}</span>
+      <span className={`font-mono font-bold ${big ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl'} ${toneClass}`}>
+        {value}
+      </span>
     </div>
   )
 }
 
 export default function SummaryBar({ hunt, stats }) {
-  const profitTone = stats.profit > 0 ? 'positive' : stats.profit < 0 ? 'danger' : null
+  const profitTone = stats.profit > 0 ? 'win' : stats.profit < 0 ? 'loss' : null
+  const allOpened = stats.unopenedCount === 0 && stats.count > 0
+  const progress = stats.count > 0 ? (stats.openedCount / stats.count) * 100 : 0
 
   return (
-    <div className="rounded-sm border border-felt-line bg-felt-light px-5 py-4 md:px-6 md:py-5">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Stat label="Start balance" value={formatMoney(hunt.startBalance, hunt.currency)} />
-        <Stat label="Total win" value={formatMoney(stats.totalWin, hunt.currency)} />
+    <div
+      className={`gradient-frame rounded-2xl px-5 py-5 shadow-panel md:px-6 ${
+        stats.profit > 0 && allOpened ? 'pulse-glow' : ''
+      }`}
+    >
+      <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
+        <Stat label="Kasa na start" value={formatMoney(hunt.startBalance, hunt.currency)} />
+        <Stat label="Wygrana" value={formatMoney(stats.totalWin, hunt.currency)} tone="gold" />
         <Stat
-          label="Profit / loss"
+          label="Zysk / strata"
           value={`${stats.profit >= 0 ? '+' : ''}${formatMoney(stats.profit, hunt.currency)}`}
           tone={profitTone}
+          big
         />
         <Stat
-          label={stats.unopenedCount > 0 ? 'Break-even needs' : 'Overall multi'}
+          label={stats.unopenedCount > 0 ? 'Do zera trzeba' : 'Ogólny multi'}
           value={
             stats.unopenedCount > 0
               ? formatMult(stats.breakEvenMultiplier)
               : formatMult(stats.overallMultiplier)
           }
+          tone="gold"
         />
       </div>
-      <div className="mt-3 text-xs text-muted">
-        {stats.openedCount} of {stats.count} slots opened
-        {stats.unopenedCount > 0 &&
-          ` — remaining bets total ${formatMoney(stats.remainingBetSum, hunt.currency)}`}
+
+      {/* pasek postępu otwierania */}
+      <div className="mt-5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-deep">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-pink via-gold to-cyan transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="mt-2.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+          <span className="font-semibold text-cream">
+            {stats.openedCount} / {stats.count}
+          </span>
+          <span>slotów otwartych</span>
+          {stats.unopenedCount > 0 && (
+            <span>
+              — pozostałe bety razem{' '}
+              <span className="font-mono text-cream">
+                {formatMoney(stats.remainingBetSum, hunt.currency)}
+              </span>
+            </span>
+          )}
+          {allOpened && (
+            <span className={`font-display uppercase tracking-wider ${stats.profit >= 0 ? 'text-win' : 'text-loss'}`}>
+              {stats.profit >= 0 ? '🤑 Na plusie!' : '💀 Przerąbane'}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
