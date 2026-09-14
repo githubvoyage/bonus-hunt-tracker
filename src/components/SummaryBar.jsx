@@ -20,9 +20,8 @@ export default function SummaryBar({ hunt, stats }) {
 
   return (
     <div className="rounded-sm border border-felt-line bg-felt-light px-5 py-4 md:px-6 md:py-5">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Stat label="Start balance" value={formatMoney(hunt.startBalance, hunt.currency)} />
-        <Stat label="Total cost" value={formatMoney(stats.totalCost, hunt.currency)} />
         <Stat label="Total win" value={formatMoney(stats.totalWin, hunt.currency)} />
         <Stat
           label="Profit / loss"

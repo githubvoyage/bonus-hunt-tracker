@@ -55,8 +55,8 @@ export default function App() {
     })
   }
 
-  function handleAddEntry({ name, provider, bet, cost }) {
-    const entry = createEntry({ name, provider, bet, cost })
+  function handleAddEntry({ name, bet }) {
+    const entry = createEntry({ name, bet })
     updateActiveHunt((h) => ({ ...h, entries: [...h.entries, entry] }))
   }
 
@@ -82,10 +82,10 @@ export default function App() {
 
   function handleExport() {
     if (!activeHunt) return
-    const rows = [['#', 'Slot', 'Provider', 'Bet', 'Cost', 'Win', 'Multiplier']]
+    const rows = [['#', 'Slot', 'Bet', 'Win', 'Multiplier']]
     activeHunt.entries.forEach((e, i) => {
       const mult = e.opened && e.bet ? (e.win / e.bet).toFixed(2) : ''
-      rows.push([i + 1, e.name, e.provider, e.bet, e.cost, e.opened ? e.win : '', mult])
+      rows.push([i + 1, e.name, e.bet, e.opened ? e.win : '', mult])
     })
     const csv = rows.map((r) => r.map((v) => `"${v}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })

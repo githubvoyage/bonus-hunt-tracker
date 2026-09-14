@@ -35,13 +35,11 @@ export function createHunt({ name, currency, startBalance }) {
   }
 }
 
-export function createEntry({ name, provider, bet, cost }) {
+export function createEntry({ name, bet }) {
   return {
     id: newId(),
     name: name || 'Unnamed slot',
-    provider: provider || '',
     bet: Number(bet) || 0,
-    cost: Number(cost) || 0,
     win: null,
     opened: false,
   }

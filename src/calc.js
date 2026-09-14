@@ -1,14 +1,14 @@
 export function huntStats(hunt) {
   const entries = hunt.entries || []
-  const totalCost = entries.reduce((s, e) => s + (Number(e.cost) || 0), 0)
+  const startBalance = Number(hunt.startBalance) || 0
   const opened = entries.filter((e) => e.opened)
   const unopened = entries.filter((e) => !e.opened)
   const totalWin = opened.reduce((s, e) => s + (Number(e.win) || 0), 0)
-  const profit = totalWin - totalCost
-  const overallMultiplier = totalCost > 0 ? totalWin / totalCost : 0
+  const profit = totalWin - startBalance
+  const overallMultiplier = startBalance > 0 ? totalWin / startBalance : 0
 
   const remainingBetSum = unopened.reduce((s, e) => s + (Number(e.bet) || 0), 0)
-  const remainingToBreakEven = totalCost - totalWin
+  const remainingToBreakEven = startBalance - totalWin
   const breakEvenMultiplier =
     remainingBetSum > 0 && remainingToBreakEven > 0
       ? remainingToBreakEven / remainingBetSum
@@ -18,7 +18,7 @@ export function huntStats(hunt) {
     count: entries.length,
     openedCount: opened.length,
     unopenedCount: unopened.length,
-    totalCost,
+    startBalance,
     totalWin,
     profit,
     overallMultiplier,

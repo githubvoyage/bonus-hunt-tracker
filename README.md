@@ -1,8 +1,8 @@
 # Bonus Hunt Tracker
 
-A fast, local-first tool for tracking online casino bonus hunts: log each slot's
-bet size and buy cost up front, reveal the win as you open it, and watch your
-profit/loss and break-even multiplier update live.
+A fast, local-first tool for tracking online casino bonus hunts: set your start
+balance, log each slot's bet size up front, reveal the win as you open it, and
+watch your profit/loss and break-even multiplier update live.
 
 Currently client-only — everything saves to your browser's localStorage. No
 backend, no login, nothing to deploy but static files.
@@ -52,11 +52,12 @@ Once you're in Claude Code, some good next prompts to keep vibe-coding:
 
 ## How the numbers work
 
-- **Cost** is what you pay to buy/enter each bonus round (or your bet size if
-  you're not buy-bonusing). Paid up front, known before any reveals.
+- **Start balance** is what the whole hunt cost you — set once when you create
+  the hunt. Every profit figure is measured against it.
 - **Win** is filled in as you open each slot — this is the only thing that
   changes live.
-- **Break-even multiplier** = (total cost so far − total win so far) ÷ (sum of
+- **Profit / loss** = total win so far − start balance.
+- **Break-even multiplier** = (start balance − total win so far) ÷ (sum of
   bets on unopened slots). It's the average multiplier you need across the
   remaining slots to walk away even.
 
@@ -70,7 +71,7 @@ src/
   components/
     HuntHeader.jsx      hunt switcher, sort toggle, export, new/delete
     NewHuntForm.jsx     create-hunt inline form
-    SummaryBar.jsx      cost / win / profit / break-even stat row
+    SummaryBar.jsx      balance / win / profit / break-even stat row
     AddEntryForm.jsx    add-a-slot inline form
     EntryTable.jsx      the ledger table + inline win entry
 ```

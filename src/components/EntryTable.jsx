@@ -18,13 +18,9 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
       <td className="py-2 pl-1 text-muted">{index + 1}</td>
       <td className="py-2 pr-3">
         <div className="text-cream">{entry.name}</div>
-        {entry.provider && <div className="text-xs text-muted">{entry.provider}</div>}
       </td>
       <td className="py-2 pr-3 text-right font-mono text-cream">
         {formatMoney(entry.bet, currency)}
-      </td>
-      <td className="py-2 pr-3 text-right font-mono text-cream">
-        {formatMoney(entry.cost, currency)}
       </td>
       <td className="py-2 pr-3 text-right font-mono">
         {entry.opened ? (
@@ -94,7 +90,6 @@ export default function EntryTable({ entries, currency, onRecordWin, onDelete, o
           <th className="pb-2 pl-1">#</th>
           <th className="pb-2 pr-3">Slot</th>
           <th className="pb-2 pr-3 text-right">Bet</th>
-          <th className="pb-2 pr-3 text-right">Cost</th>
           <th className="pb-2 pr-3 text-right">Win</th>
           <th className="pb-2 pr-3 text-right">Multi</th>
           <th className="pb-2"></th>

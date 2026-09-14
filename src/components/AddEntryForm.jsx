@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const empty = { name: '', provider: '', bet: '', cost: '' }
+const empty = { name: '', bet: '' }
 
 export default function AddEntryForm({ onAdd }) {
   const [form, setForm] = useState(empty)
@@ -14,9 +14,7 @@ export default function AddEntryForm({ onAdd }) {
     if (!form.name.trim()) return
     onAdd({
       name: form.name.trim(),
-      provider: form.provider.trim(),
       bet: form.bet,
-      cost: form.cost,
     })
     setForm(empty)
   }
@@ -36,31 +34,12 @@ export default function AddEntryForm({ onAdd }) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-xs uppercase tracking-wide text-muted">Provider</label>
-        <input
-          value={form.provider}
-          onChange={(e) => update('provider', e.target.value)}
-          placeholder="Pragmatic Play"
-          className="w-36 rounded-sm border border-felt-line bg-felt px-2 py-1.5 text-cream placeholder:text-muted/60"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
         <label className="text-xs uppercase tracking-wide text-muted">Bet size</label>
         <input
           value={form.bet}
           onChange={(e) => update('bet', e.target.value)}
           inputMode="decimal"
           placeholder="2.00"
-          className="w-24 rounded-sm border border-felt-line bg-felt px-2 py-1.5 font-mono text-cream placeholder:text-muted/60"
-        />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label className="text-xs uppercase tracking-wide text-muted">Cost</label>
-        <input
-          value={form.cost}
-          onChange={(e) => update('cost', e.target.value)}
-          inputMode="decimal"
-          placeholder="40.00"
           className="w-24 rounded-sm border border-felt-line bg-felt px-2 py-1.5 font-mono text-cream placeholder:text-muted/60"
         />
       </div>
