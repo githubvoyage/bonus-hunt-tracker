@@ -32,7 +32,7 @@ export function entryMultiplier(entry) {
   return (Number(entry.win) || 0) / Number(entry.bet)
 }
 
-export function formatMoney(value, currency = '$') {
+export function formatMoney(value, currency = '€') {
   const n = Number(value) || 0
   return `${currency}${n.toLocaleString(undefined, {
     minimumFractionDigits: 2,

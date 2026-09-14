@@ -28,7 +28,7 @@ export function createHunt({ name, currency, startBalance }) {
   return {
     id: newId(),
     name: name || 'Untitled hunt',
-    currency: currency || '$',
+    currency: currency || '€',
     startBalance: Number(startBalance) || 0,
     createdAt: Date.now(),
     entries: [],

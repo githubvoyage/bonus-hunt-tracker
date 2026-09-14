@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 export default function NewHuntForm({ onCreate, onCancel }) {
   const [name, setName] = useState('')
-  const [currency, setCurrency] = useState('$')
+  const [currency, setCurrency] = useState('€')
   const [startBalance, setStartBalance] = useState('')
 
   function handleSubmit(e) {
