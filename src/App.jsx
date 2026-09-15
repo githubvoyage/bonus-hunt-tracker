@@ -16,6 +16,7 @@ export default function App() {
   const [showNewForm, setShowNewForm] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
+  const [view, setView] = useState('hunt')
 
   useEffect(() => {
     const stored = loadHunts()
@@ -150,44 +151,50 @@ export default function App() {
           onDelete={handleDeleteHunt}
           onFinish={handleFinishHunt}
           sendingSummary={sendingSummary}
+          view={view}
+          onChangeView={setView}
         />
 
-        {showNewForm && (
-          <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
-        )}
+        {view === 'wheel' && <WheelPanel currency={activeHunt?.currency || '€'} />}
 
-        <WheelPanel currency={activeHunt?.currency || '€'} />
-
-        {activeHunt && stats && (
+        {view === 'hunt' && (
           <>
-            <SummaryBar hunt={activeHunt} stats={stats} />
-            <ParticipantsPanel
-              hunt={activeHunt}
-              split={split}
-              onAdd={handleAddParticipant}
-              onUpdate={handleUpdateParticipant}
-              onRemove={handleRemoveParticipant}
-              onSetStartBalance={handleSetStartBalance}
-            />
-            <AddEntryForm onAdd={handleAddEntry} />
-            <EntryTable
-              entries={activeHunt.entries}
-              currency={activeHunt.currency}
-              onRecordWin={handleRecordWin}
-              onDelete={handleDeleteEntry}
-              onReopen={handleReopen}
-            />
-          </>
-        )}
+            {showNewForm && (
+              <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
+            )}
 
-        {!activeHunt && !showNewForm && (
-          <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
-            <div className="mb-3 text-4xl">🎰</div>
-            <p className="font-display text-sm uppercase tracking-wider text-muted">
-              Nie ma żadnego hunta
-            </p>
-            <p className="mt-2 text-sm text-muted/70">Odpal nowy i lecimy.</p>
-          </div>
+            {activeHunt && stats && (
+              <>
+                <SummaryBar hunt={activeHunt} stats={stats} />
+                <ParticipantsPanel
+                  hunt={activeHunt}
+                  split={split}
+                  onAdd={handleAddParticipant}
+                  onUpdate={handleUpdateParticipant}
+                  onRemove={handleRemoveParticipant}
+                  onSetStartBalance={handleSetStartBalance}
+                />
+                <AddEntryForm onAdd={handleAddEntry} />
+                <EntryTable
+                  entries={activeHunt.entries}
+                  currency={activeHunt.currency}
+                  onRecordWin={handleRecordWin}
+                  onDelete={handleDeleteEntry}
+                  onReopen={handleReopen}
+                />
+              </>
+            )}
+
+            {!activeHunt && !showNewForm && (
+              <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
+                <div className="mb-3 text-4xl">🎰</div>
+                <p className="font-display text-sm uppercase tracking-wider text-muted">
+                  Nie ma żadnego hunta
+                </p>
+                <p className="mt-2 text-sm text-muted/70">Odpal nowy i lecimy.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
