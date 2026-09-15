@@ -13,7 +13,6 @@ export default function App() {
   const [hunts, setHunts] = useState([])
   const [activeId, setActiveId] = useState(null)
   const [showNewForm, setShowNewForm] = useState(false)
-  const [sortByMultiplier, setSortByMultiplier] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
 
@@ -137,23 +136,6 @@ export default function App() {
     }
   }
 
-  function handleExport() {
-    if (!activeHunt) return
-    const rows = [['#', 'Slot', 'Bet', 'Wygrana', 'Multi']]
-    activeHunt.entries.forEach((e, i) => {
-      const mult = e.opened && e.bet ? (e.win / e.bet).toFixed(2) : ''
-      rows.push([i + 1, e.name, e.bet, e.opened ? e.win : '', mult])
-    })
-    const csv = rows.map((r) => r.map((v) => `"${v}"`).join(',')).join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${activeHunt.name.replace(/\s+/g, '_')}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   if (!loaded) return null
 
   return (
@@ -165,9 +147,6 @@ export default function App() {
           onSelect={setActiveId}
           onNew={() => setShowNewForm(true)}
           onDelete={handleDeleteHunt}
-          sortByMultiplier={sortByMultiplier}
-          onToggleSort={() => setSortByMultiplier((s) => !s)}
-          onExport={handleExport}
           onFinish={handleFinishHunt}
           sendingSummary={sendingSummary}
         />
@@ -194,7 +173,6 @@ export default function App() {
               onRecordWin={handleRecordWin}
               onDelete={handleDeleteEntry}
               onReopen={handleReopen}
-              sortByMultiplier={sortByMultiplier}
             />
           </>
         )}

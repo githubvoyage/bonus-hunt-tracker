@@ -4,9 +4,6 @@ export default function HuntHeader({
   onSelect,
   onNew,
   onDelete,
-  sortByMultiplier,
-  onToggleSort,
-  onExport,
   onFinish,
   sendingSummary,
 }) {
@@ -39,24 +36,6 @@ export default function HuntHeader({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <button
-          onClick={onToggleSort}
-          className={`rounded-lg border px-3 py-2 font-semibold transition-all ${
-            sortByMultiplier
-              ? 'border-cyan text-cyan shadow-neon-cyan'
-              : 'border-line text-muted hover:border-cyan hover:text-cyan'
-          }`}
-        >
-          {sortByMultiplier ? '🔥 Najlepszy multi' : '↕ Kolejność dodania'}
-        </button>
-
-        <button
-          onClick={onExport}
-          className="rounded-lg border border-line px-3 py-2 font-semibold text-muted transition-all hover:border-violet hover:text-violet"
-        >
-          ⬇ Export CSV
-        </button>
-
         {activeId && (
           <button
             onClick={onFinish}

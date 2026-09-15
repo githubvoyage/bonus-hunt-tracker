@@ -86,25 +86,7 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   )
 }
 
-export default function EntryTable({
-  entries,
-  currency,
-  onRecordWin,
-  onDelete,
-  onReopen,
-  sortByMultiplier,
-}) {
-  const sorted = sortByMultiplier
-    ? [...entries].sort((a, b) => {
-        const ma = entryMultiplier(a)
-        const mb = entryMultiplier(b)
-        if (ma === null && mb === null) return 0
-        if (ma === null) return 1
-        if (mb === null) return -1
-        return mb - ma
-      })
-    : entries
-
+export default function EntryTable({ entries, currency, onRecordWin, onDelete, onReopen }) {
   if (entries.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
@@ -131,7 +113,7 @@ export default function EntryTable({
           </tr>
         </thead>
         <tbody>
-          {sorted.map((entry, i) => (
+          {entries.map((entry, i) => (
             <Row
               key={entry.id}
               entry={entry}

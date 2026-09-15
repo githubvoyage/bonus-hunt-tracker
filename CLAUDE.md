@@ -55,9 +55,10 @@ src/
   App.jsx                  cały stan aplikacji + handlery + zapis do localStorage
   calc.js                  cała matematyka (czyste funkcje): huntStats, splitPayouts, formatowanie
   storage.js               odczyt/zapis localStorage + fabryki: createHunt, createEntry, createParticipant
+  discord.js               budowa i wysyłka podsumowania hunta na webhook Discorda
   index.css                fonty, tło, neonowe efekty, animacje
   components/
-    HuntHeader.jsx         logo, wybór hunta, sortowanie, export CSV, nowy/usuń hunt
+    HuntHeader.jsx         logo, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
     NewHuntForm.jsx        formularz nowego hunta (przycisk „Napierdalamy”)
     SummaryBar.jsx         statystyki: kasa na start, wygrana, zysk/strata, break-even, pasek postępu
     ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
@@ -106,7 +107,7 @@ node --input-type=module -e "import { splitPayouts } from './src/calc.js'; conso
 
 ## UI i styl
 
-**Język:** interfejs jest po polsku. Po angielsku zostają tylko nazwa „Bonus Hunt Tracker” i branżowe terminy: **Slot, Bet, Multi, Export CSV**. Ton jest luźny, gamblerski i z humorem („Napierdalamy”, „Dorzuć slota”, „Spadaj”, „Pusto jak w portfelu”, „🔥 Mega banger”). Nowe teksty trzymaj w tym klimacie, a nie w korpo-stylu.
+**Język:** interfejs jest po polsku. Po angielsku zostają tylko nazwa „Bonus Hunt Tracker” i branżowe terminy: **Slot, Bet, Multi**. Ton jest luźny, gamblerski i z humorem („Napierdalamy”, „Dorzuć slota”, „Spadaj”, „Pusto jak w portfelu”, „🔥 Mega banger”). Nowe teksty trzymaj w tym klimacie, a nie w korpo-stylu.
 
 **Design:** kasyno w neonach na ciemnym fioletowo-czarnym tle. Używaj tokenów z `tailwind.config.js` zamiast wpisywać kolory z ręki:
 
@@ -116,7 +117,7 @@ node --input-type=module -e "import { splitPayouts } from './src/calc.js'; conso
 | `line`, `line-bright` | obramowania |
 | `gold`, `gold-bright` | akcent główny, wygrane, multi ≥10x |
 | `pink` | akcent drugi, mega wygrane ≥50x, dodawanie slotów |
-| `cyan` | ekipa i podział, sortowanie |
+| `cyan` | ekipa i podział |
 | `violet` | akcenty poboczne |
 | `win` / `loss` | zysk / strata |
 | `cream` / `muted` | tekst główny / drugorzędny |
@@ -133,5 +134,4 @@ Wymagania:
 
 - Brak synchronizacji między urządzeniami, bo dane żyją tylko w jednej przeglądarce. Możliwe kierunki: export/import JSON albo backend typu Supabase.
 - „Do zera trzeba” pokazuje `—`, gdy hunt jest już na plusie. Lepiej byłoby wyświetlić np. „✅ Już odrobione”.
-- Export CSV zawiera tylko sloty, bez podziału dla ekipy.
 - Nie ma edycji kasy na start ani nazwy hunta po utworzeniu. Kasę da się tylko zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.
