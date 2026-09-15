@@ -7,7 +7,7 @@ Tylko klient, bez backendu i bez logowania. Wszystko zapisuje się w `localStora
 ## Workflow git — obowiązkowy
 
 **Każdą zakończoną i zweryfikowaną zmianę commituj i pushuj sam, bez pytania o zgodę.** To jest domyślny tryb pracy w tym repo.
-
+dupa
 1. `npm run build` musi przejść (testów nie ma, build to minimalna weryfikacja).
 2. Jeśli zmiana jest widoczna w UI, odpal apkę i sprawdź ją w przeglądarce.
 3. `git add` tylko plików, które faktycznie zmieniłeś. Nigdy `dist/` ani `node_modules/`, oba są w `.gitignore`.
