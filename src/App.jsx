@@ -8,6 +8,7 @@ import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
 import ParticipantsPanel from './components/ParticipantsPanel.jsx'
+import WheelPanel from './components/WheelPanel.jsx'
 
 export default function App() {
   const [hunts, setHunts] = useState([])
@@ -154,6 +155,8 @@ export default function App() {
         {showNewForm && (
           <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
         )}
+
+        <WheelPanel currency={activeHunt?.currency || '€'} />
 
         {activeHunt && stats && (
           <>

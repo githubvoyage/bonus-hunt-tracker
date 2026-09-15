@@ -56,6 +56,8 @@ src/
   calc.js                  cała matematyka (czyste funkcje): huntStats, splitPayouts, formatowanie
   storage.js               odczyt/zapis localStorage + fabryki: createHunt, createEntry, createParticipant
   discord.js               budowa i wysyłka podsumowania hunta na webhook Discorda
+  wheel.js                 losowanie ważone i localStorage koła zrzutki (czyste funkcje)
+  confetti.js              efekt konfetti na canvasie, bez zależności
   index.css                fonty, tło, neonowe efekty, animacje
   components/
     HuntHeader.jsx         logo, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
@@ -64,6 +66,7 @@ src/
     ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
     AddEntryForm.jsx       dodawanie slota
     EntryTable.jsx         tabela slotów z wpisywaniem wygranych
+    WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
 ```
 
 Logika liczenia ma zostać w `calc.js` jako czyste funkcje, a komponenty tylko wyświetlają wyniki.
@@ -85,6 +88,17 @@ participant = { id, name, amount, paidBy /* id osoby, która wpłaciła; null = 
 ```
 
 **Kompatybilność wstecz:** w przeglądarkach użytkowników leżą stare hunty zapisane wcześniejszymi wersjami, np. bez `participants`. Zawsze czytaj pola opcjonalnie (`h.participants || []`). Jeśli zmieniasz kształt danych w sposób niekompatybilny, podbij wersję klucza i dopisz migrację w `loadHunts`, żeby nie wyczyścić ludziom danych.
+
+Koło zrzutki ma osobny klucz `bonushunt.wheel.v1` (niezależny od huntów):
+
+```js
+wheelState = {
+  options: [{ id, amount, weight }],  // amount = kwota do wpłaty, weight = waga losowania (nie %)
+  background: dataUrlOrNull,          // obrazek tła koła jako data URL (skalowany do 900px przy uploadzie)
+}
+```
+
+Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentages` / komponent), nigdy nie zapisywany na sztywno.
 
 ## Zasady liczenia
 
