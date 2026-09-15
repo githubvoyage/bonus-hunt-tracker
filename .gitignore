@@ -2,3 +2,8 @@ node_modules
 dist
 .DS_Store
 *.local
+
+# sekrety - nigdy do repo
+.env
+.env.*
+!.env.example

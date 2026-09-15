@@ -23,6 +23,17 @@ Tylko klient, bez backendu i bez logowania. Wszystko zapisuje się w `localStora
 
 Zakazane: `push --force`, przepisywanie historii (`rebase`/`reset` na wypchniętych commitach), usuwanie gałęzi. Jeśli push zostanie odrzucony, bo remote ma nowsze commity, zrób `git pull --rebase`, rozwiąż konflikty i dopiero wtedy pushuj. Jeśli nie wiesz, jak rozwiązać konflikt, zatrzymaj się i zapytaj.
 
+## Sekrety: traktuj repo jak publiczne
+
+Wszystko, co trafi do repo, łącznie z historią commitów, może zobaczyć każdy. Usunięcie pliku w kolejnym commicie **nie** usuwa go z historii.
+
+- **Nigdy nie commituj sekretów:** kluczy API, tokenów, haseł, connection stringów, plików `.env`. Pliki `.env` i `.env.*` są w `.gitignore` i tak ma zostać.
+- Przed każdym commitem przejrzyj `git diff --cached` pod kątem sekretów. Jeśli coś wygląda na klucz albo token, nie commituj, tylko zatrzymaj się i zapytaj.
+- Konfigurację trzymaj w `.env.local`, który nie trafia do repo. Jeśli potrzebny jest wzór, dodaj `.env.example` z pustymi wartościami.
+- **Uwaga na Vite:** każda zmienna `VITE_*` jest wklejana do zbudowanego JS, więc zobaczy ją każdy odwiedzający stronę. Na froncie mogą być tylko klucze publiczne z założenia (np. `anon` key Supabase z włączonym RLS). Kluczy serwerowych (np. `service_role`) nie wolno używać w tej apce w ogóle.
+- Na produkcji zmienne środowiskowe ustawia się w panelu Vercela, a nie w repo.
+- Jeśli sekret już trafił do repo, sam commit „usuwający” nic nie da. Zatrzymaj się i powiedz, że klucz trzeba **natychmiast unieważnić i wygenerować nowy**.
+
 ## Komendy
 
 ```bash
