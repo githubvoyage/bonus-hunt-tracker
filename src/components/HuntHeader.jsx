@@ -7,7 +7,11 @@ export default function HuntHeader({
   sortByMultiplier,
   onToggleSort,
   onExport,
+  onFinish,
+  sendingSummary,
 }) {
+  const activeHunt = hunts.find((h) => h.id === activeId) || null
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
       <div className="flex flex-wrap items-center gap-4">
@@ -52,6 +56,24 @@ export default function HuntHeader({
         >
           ⬇ Export CSV
         </button>
+
+        {activeId && (
+          <button
+            onClick={onFinish}
+            disabled={sendingSummary}
+            className={`rounded-lg border px-3 py-2 font-semibold transition-all disabled:cursor-wait disabled:opacity-60 ${
+              activeHunt?.finished
+                ? 'border-win/50 text-win hover:border-win hover:shadow-neon-win'
+                : 'border-line text-muted hover:border-win hover:text-win'
+            }`}
+          >
+            {sendingSummary
+              ? '⏳ Wysyłanie...'
+              : activeHunt?.finished
+              ? '✅ Zakończony — wyślij ponownie'
+              : '🏁 Zakończ hunta'}
+          </button>
+        )}
 
         <button
           onClick={onNew}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadHunts, saveHunts, createHunt, createEntry, createParticipant } from './storage.js'
 import { huntStats, splitPayouts } from './calc.js'
+import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntForm from './components/NewHuntForm.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
@@ -14,6 +15,7 @@ export default function App() {
   const [showNewForm, setShowNewForm] = useState(false)
   const [sortByMultiplier, setSortByMultiplier] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [sendingSummary, setSendingSummary] = useState(false)
 
   useEffect(() => {
     const stored = loadHunts()
@@ -108,6 +110,33 @@ export default function App() {
     updateActiveHunt((h) => ({ ...h, startBalance: Number(value) || 0 }))
   }
 
+  async function handleFinishHunt() {
+    if (!activeHunt || !stats) return
+    const already = Boolean(activeHunt.finished)
+    if (
+      !confirm(
+        already
+          ? 'Wysłać podsumowanie tego hunta na Discorda jeszcze raz?'
+          : 'Zakończyć hunta i wysłać podsumowanie na Discorda?'
+      )
+    )
+      return
+
+    const huntId = activeHunt.id
+    setSendingSummary(true)
+    try {
+      await sendHuntSummary(activeHunt, stats)
+      setHunts((prev) =>
+        prev.map((h) => (h.id === huntId ? { ...h, finished: true, finishedAt: Date.now() } : h))
+      )
+    } catch (e) {
+      console.error(e)
+      alert('Nie udało się wysłać podsumowania na Discorda. Sprawdź połączenie i spróbuj ponownie.')
+    } finally {
+      setSendingSummary(false)
+    }
+  }
+
   function handleExport() {
     if (!activeHunt) return
     const rows = [['#', 'Slot', 'Bet', 'Wygrana', 'Multi']]
@@ -139,6 +168,8 @@ export default function App() {
           sortByMultiplier={sortByMultiplier}
           onToggleSort={() => setSortByMultiplier((s) => !s)}
           onExport={handleExport}
+          onFinish={handleFinishHunt}
+          sendingSummary={sendingSummary}
         />
 
         {showNewForm && (
