@@ -52,8 +52,8 @@ React 18 + Vite 5 + Tailwind CSS 3. Żadnych innych zależności runtime. Nie do
 
 ```
 src/
-  App.jsx                  cały stan aplikacji + handlery + zapis do localStorage
-  calc.js                  cała matematyka (czyste funkcje): huntStats, overallStats, splitPayouts, formatowanie
+  App.jsx                  cały stan aplikacji + handlery + zapis do localStorage; przyciski zakończenia (webhook Discord) i usunięcia hunta siedzą na dole panelu hunta, nie w nagłówku
+  calc.js                  cała matematyka (czyste funkcje): huntStats, overallStats, computeRankings, knownSlotNames, splitPayouts, formatowanie
   storage.js               odczyt/zapis localStorage + fabryki: createHunt, createEntry, createParticipant
   cloud.js                 synchronizacja huntów z Supabase (opcjonalna, scalanie i realtime)
   discord.js               budowa i wysyłka podsumowania hunta na webhook Discorda
@@ -61,14 +61,15 @@ src/
   confetti.js              efekt konfetti na canvasie, bez zależności
   index.css                fonty, tło, neonowe efekty, animacje
   components/
-    HuntHeader.jsx         logo, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
+    HuntHeader.jsx         logo na tle header-glow, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki/Rankingi, wybór hunta, nowy hunt
     NewHuntButton.jsx      przycisk „nowy hunt” z dymkiem na nazwę („Jak nazywamy jazdę?”)
     SummaryBar.jsx         całe okno hunta w tęczowej ramce: edytowalna nazwa/waluta/kasa na start, statystyki, pasek postępu, a jako podokna podział szmalu i lista slotów
     ParticipantsPanel.jsx  „Podział szmalu”: podokno SummaryBara; domyślnie sam wynik, dodawanie i zmiany pod przyciskiem edycji
-    AddEntryForm.jsx       rząd pól do dodania slota (renderowany w EntryTable, nie osobno)
+    AddEntryForm.jsx       rząd pól do dodania slota z autouzupełnianiem nazwy (datalist z knownSlotNames)
     EditableValue.jsx      pole edytowane w miejscu (przerywana ramka, commit na Enter/blur)
     EntryTable.jsx         podokno SummaryBara: dodawanie slota na górze + tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
+    RankingsPanel.jsx      zakładka Rankingi: najlepszy/najgorszy slot, największy/najmniejszy multi itd. ze wszystkich huntów
 ```
 
 Logika liczenia ma zostać w `calc.js` jako czyste funkcje, a komponenty tylko wyświetlają wyniki.
@@ -109,6 +110,8 @@ Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentag
 - **Do zera trzeba (break-even)** = (kasa na start − suma wygranych) ÷ suma betów nieotwartych slotów. Gdy jesteś już na plusie, wynik to `null` i wyświetla się `—`.
 - **Multi slota** = wygrana ÷ bet.
 - **Bilans wszystkich huntów** (`overallStats`) = suma kasy na start i suma wygranych ze wszystkich huntów, policzona osobno dla każdej waluty (nie sumuj € z $).
+- **Rankingi** (`computeRankings`) = statystyki po wszystkich otwartych slotach ze wszystkich huntów. Kwoty (najlepsza/najgorsza wygrana, suma) liczone osobno per waluta jak w `overallStats`; multi (największy/najmniejszy/średni) jest bezwymiarowe, więc liczone wspólnie bez podziału na walutę.
+- **Baza slotów** (`knownSlotNames`) = unikalne nazwy slotów wpisane kiedykolwiek w dowolnym huncie, posortowane od najczęściej granych — brak osobnego klucza w localStorage, liczone w locie z `hunts`. Zasila `datalist` w `AddEntryForm`.
 - **Podział dla ekipy** (`splitPayouts`):
   - udział = wkład osoby ÷ suma wkładów,
   - wypłata brutto = aktualna suma wygranych × udział,
@@ -141,7 +144,7 @@ node --input-type=module -e "import { splitPayouts } from './src/calc.js'; conso
 
 Fonty: `font-display` (Bungee) na nagłówki i przyciski, `font-sans` (Inter) na UI, `font-mono` (JetBrains Mono) na wszystkie kwoty i liczby.
 
-Gotowe klasy w `index.css`: `neon-gold`, `neon-pink`, `neon-win`, `neon-loss` (świecący tekst), `gradient-frame` (tęczowa ramka panelu), `btn-jazda` (animowany gradient na głównym przycisku), `pulse-glow`, `blink`, `row-settle`. Cienie: `shadow-neon-gold`, `shadow-neon-pink`, `shadow-neon-cyan`, `shadow-neon-win`, `shadow-panel`.
+Gotowe klasy w `index.css`: `neon-gold`, `neon-pink`, `neon-win`, `neon-loss` (świecący tekst), `gradient-frame` (tęczowa ramka panelu), `header-glow` (nieprzezroczysta poświata pod sticky nagłówkiem), `btn-jazda` (animowany gradient na głównym przycisku), `pulse-glow`, `blink`, `row-settle`. Cienie: `shadow-neon-gold`, `shadow-neon-pink`, `shadow-neon-cyan`, `shadow-neon-win`, `shadow-panel`.
 
 Wymagania:
 - Apka musi działać na telefonie (~375px szerokości). Tabele trzymaj w `overflow-x-auto`, a wiersze formularzy w `flex-wrap`.

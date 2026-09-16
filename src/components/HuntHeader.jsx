@@ -7,15 +7,10 @@ export default function HuntHeader({
   activeId,
   onSelect,
   onNew,
-  onDelete,
-  onFinish,
-  sendingSummary,
   view,
   onChangeView,
   overall,
 }) {
-  const activeHunt = hunts.find((h) => h.id === activeId) || null
-
   // Na telefonie cały nagłówek zabierałby po zjechaniu prawie pół ekranu,
   // więc logo i bilans chowają się, a zostaje sam pasek do klikania.
   const [compact, setCompact] = useState(false)
@@ -33,7 +28,7 @@ export default function HuntHeader({
     // przykleja się do góry przy scrollu, żeby przełączanie huntów i bilans
     // były pod ręką także w połowie długiej listy slotów
     <div
-      className={`sticky top-0 z-20 -mx-4 space-y-4 border-b border-line bg-bg px-4 shadow-lg shadow-bg/80 md:-mx-10 md:px-10 md:py-4 ${
+      className={`header-glow sticky top-0 z-20 -mx-4 space-y-4 border-b border-line px-4 shadow-lg shadow-bg/80 md:-mx-10 md:px-10 md:py-4 ${
         compact ? 'py-2' : 'py-4'
       }`}
     >
@@ -88,6 +83,16 @@ export default function HuntHeader({
           >
             🎡 Koło zrzutki
           </button>
+          <button
+            onClick={() => onChangeView('rankings')}
+            className={`rounded-lg border px-4 py-2 font-display text-xs uppercase tracking-wider transition-all ${
+              view === 'rankings'
+                ? 'border-win text-win shadow-neon-win'
+                : 'border-line text-muted hover:border-win hover:text-win'
+            }`}
+          >
+            🏆 Rankingi
+          </button>
         </div>
       </div>
 
@@ -107,40 +112,7 @@ export default function HuntHeader({
             </select>
           )}
 
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            {activeId && (
-              <button
-                onClick={onFinish}
-                disabled={sendingSummary}
-                className={`rounded-lg border px-3 py-2 font-semibold transition-all disabled:cursor-wait disabled:opacity-60 ${
-                  compact ? 'hidden md:block' : ''
-                } ${
-                  activeHunt?.finished
-                    ? 'border-win/50 text-win hover:border-win hover:shadow-neon-win'
-                    : 'border-line text-muted hover:border-win hover:text-win'
-                }`}
-              >
-                {sendingSummary
-                  ? '⏳ Wysyłanie...'
-                  : activeHunt?.finished
-                  ? '✅ Zakończony — wyślij ponownie'
-                  : '🏁 Zakończ hunta'}
-              </button>
-            )}
-
-            <NewHuntButton onCreate={onNew} />
-
-            {activeId && (
-              <button
-                onClick={() => onDelete(activeId)}
-                className={`rounded-lg border border-transparent px-3 py-2 font-semibold text-muted transition-all hover:border-loss hover:text-loss ${
-                  compact ? 'hidden md:block' : ''
-                }`}
-              >
-                🗑 Usuń hunta
-              </button>
-            )}
-          </div>
+          <NewHuntButton onCreate={onNew} />
         </div>
       )}
     </div>

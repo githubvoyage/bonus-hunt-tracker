@@ -106,12 +106,13 @@ export default function EntryTable({
   onRecordWin,
   onDelete,
   onReopen,
+  slotNames,
 }) {
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-line/70 bg-bg-deep/40">
       {/* dorzucanie slota siedzi w tym samym kontenerze co lista */}
       <div className="border-b border-line/70 px-4 py-4">
-        <AddEntryForm onAdd={onAdd} />
+        <AddEntryForm onAdd={onAdd} slotNames={slotNames} />
       </div>
 
       {entries.length === 0 ? (

@@ -8,7 +8,7 @@ import {
   pendingPush,
   subscribeToHunts,
 } from './cloud.js'
-import { huntStats, splitPayouts, overallStats } from './calc.js'
+import { huntStats, splitPayouts, overallStats, knownSlotNames } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntButton from './components/NewHuntButton.jsx'
@@ -16,6 +16,7 @@ import SummaryBar from './components/SummaryBar.jsx'
 import EntryTable from './components/EntryTable.jsx'
 import ParticipantsPanel from './components/ParticipantsPanel.jsx'
 import WheelPanel from './components/WheelPanel.jsx'
+import RankingsPanel from './components/RankingsPanel.jsx'
 
 export default function App() {
   const [hunts, setHunts] = useState([])
@@ -109,6 +110,7 @@ export default function App() {
   }, [hunts, activeId, loaded])
 
   const overall = useMemo(() => overallStats(hunts), [hunts])
+  const slotNames = useMemo(() => knownSlotNames(hunts), [hunts])
   const activeHunt = useMemo(() => hunts.find((h) => h.id === activeId) || null, [hunts, activeId])
   const stats = useMemo(() => (activeHunt ? huntStats(activeHunt) : null), [activeHunt])
   const split = useMemo(
@@ -246,15 +248,14 @@ export default function App() {
           activeId={activeId}
           onSelect={setActiveId}
           onNew={handleCreateHunt}
-          onDelete={handleDeleteHunt}
-          onFinish={handleFinishHunt}
-          sendingSummary={sendingSummary}
           view={view}
           onChangeView={setView}
           overall={overall}
         />
 
         {view === 'wheel' && <WheelPanel currency={activeHunt?.currency || '€'} />}
+
+        {view === 'rankings' && <RankingsPanel hunts={hunts} />}
 
         {view === 'hunt' && (
           <>
@@ -283,8 +284,33 @@ export default function App() {
                     onRecordWin={handleRecordWin}
                     onDelete={handleDeleteEntry}
                     onReopen={handleReopen}
+                    slotNames={slotNames}
                   />
                 </SummaryBar>
+
+                <div className="flex flex-wrap items-center justify-center gap-3 border-t border-line/40 pt-4">
+                  <button
+                    onClick={handleFinishHunt}
+                    disabled={sendingSummary}
+                    className={`rounded-lg border px-4 py-2 font-semibold transition-all disabled:cursor-wait disabled:opacity-60 ${
+                      activeHunt.finished
+                        ? 'border-win/50 text-win hover:border-win hover:shadow-neon-win'
+                        : 'border-line text-muted hover:border-win hover:text-win'
+                    }`}
+                  >
+                    {sendingSummary
+                      ? '⏳ Wysyłanie...'
+                      : activeHunt.finished
+                      ? '✅ Zakończony — wyślij ponownie'
+                      : '🏁 Zakończ hunta'}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteHunt(activeHunt.id)}
+                    className="rounded-lg border border-transparent px-4 py-2 font-semibold text-muted transition-all hover:border-loss hover:text-loss"
+                  >
+                    🗑 Usuń hunta
+                  </button>
+                </div>
               </>
             )}
 

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 const empty = { name: '', bet: '' }
 
-export default function AddEntryForm({ onAdd }) {
+export default function AddEntryForm({ onAdd, slotNames = [] }) {
   const [form, setForm] = useState(empty)
+  const datalistId = useId()
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }))
@@ -29,8 +30,15 @@ export default function AddEntryForm({ onAdd }) {
           value={form.name}
           onChange={(e) => update('name', e.target.value)}
           placeholder="Sweet Bonanza"
+          list={datalistId}
+          autoComplete="off"
           className="w-52 rounded-lg border border-line bg-bg-deep px-3 py-2 text-cream transition-colors placeholder:text-muted/50 focus:border-pink"
         />
+        <datalist id={datalistId}>
+          {slotNames.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
       </div>
 
       <div className="flex flex-col gap-1.5">

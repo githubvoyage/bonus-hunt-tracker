@@ -48,6 +48,15 @@ body {
   border: 1px solid transparent;
 }
 
+/* poświata nagłówka — nieprzezroczysta (sticky zasłania treść pod spodem) */
+.header-glow {
+  background-color: #0d0620;
+  background-image:
+    radial-gradient(circle at 8% 20%, rgba(255, 46, 136, 0.28), transparent 55%),
+    radial-gradient(circle at 92% 10%, rgba(34, 228, 255, 0.24), transparent 50%),
+    radial-gradient(circle at 50% 150%, rgba(168, 85, 247, 0.3), transparent 65%);
+}
+
 /* ---------- animacje ---------- */
 @keyframes settle {
   0% {
