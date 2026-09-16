@@ -124,12 +124,17 @@ export async function pushHunt(hunt) {
   synced.set(hunt.id, JSON.stringify(hunt))
 }
 
-/** Kasowanie to tombstone, żeby inne urządzenia też usunęły hunta u siebie. */
-export async function pushDelete(id) {
+/**
+ * Kasowanie to tombstone, żeby inne urządzenia też usunęły hunta u siebie.
+ * Zawartość zostaje w wierszu: kasowanie leci od razu na całą ekipę, więc po
+ * przypadkowym kliknięciu da się hunta wygrzebać z bazy.
+ */
+export async function pushDelete(hunt) {
+  const id = hunt.id
   if (!supabase) return
   const { data, error } = await supabase
     .from('hunts')
-    .upsert({ id, data: { id }, deleted: true })
+    .upsert({ id, data: hunt, deleted: true })
     .select('updated_at')
     .single()
   if (error) throw error

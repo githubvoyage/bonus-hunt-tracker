@@ -132,7 +132,8 @@ export default function App() {
   }
 
   function handleDeleteHunt(id) {
-    if (!confirm('Usunąć tego hunta? Nie ma odwrotu.')) return
+    if (!confirm('Usunąć tego hunta? Zniknie całej ekipie.')) return
+    const doomed = hunts.find((h) => h.id === id) || { id }
     setHunts((prev) => {
       const next = prev.filter((h) => h.id !== id)
       if (next.length > 0) setActiveId(next[0].id)
@@ -143,7 +144,7 @@ export default function App() {
       return next
     })
     if (cloudReady) {
-      pushDelete(id).catch((e) => {
+      pushDelete(doomed).catch((e) => {
         console.error('Nie udało się skasować hunta w chmurze', e)
         setSyncState('error')
       })
@@ -232,26 +233,6 @@ export default function App() {
   return (
     <div className="min-h-screen px-4 py-6 md:px-10 md:py-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        {cloudEnabled && (
-          <div className="flex justify-end">
-            <span
-              className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider ${
-                syncState === 'error'
-                  ? 'border-loss/50 text-loss'
-                  : syncState === 'syncing'
-                    ? 'border-line-bright text-muted'
-                    : 'border-cyan/40 text-cyan'
-              }`}
-            >
-              {syncState === 'error'
-                ? '⚠ chmura padła, gram lokalnie'
-                : syncState === 'syncing'
-                  ? '⟳ zgrywam z ekipą…'
-                  : '☁ ekipa widzi to samo'}
-            </span>
-          </div>
-        )}
-
         <HuntHeader
           hunts={hunts}
           activeId={activeId}
@@ -306,6 +287,20 @@ export default function App() {
             )}
           </>
         )}
+
+        <footer className="border-t border-line/60 pt-4 text-center font-mono text-[11px] leading-relaxed text-muted/60">
+          {!cloudEnabled && 'Chmura wyłączona — hunty siedzą tylko w tej przeglądarce.'}
+          {cloudEnabled && syncState === 'syncing' && 'Zgrywam z ekipą…'}
+          {cloudEnabled &&
+            syncState === 'idle' &&
+            'Zgrane z ekipą — każdy na tym samym adresie widzi te same hunty.'}
+          {cloudEnabled && syncState === 'error' && (
+            <span className="text-loss/80">
+              Chmura nie odpowiada. Wpisuj dalej, wszystko siedzi w tej przeglądarce i dopchnie się
+              samo, jak połączenie wróci.
+            </span>
+          )}
+        </footer>
       </div>
     </div>
   )
