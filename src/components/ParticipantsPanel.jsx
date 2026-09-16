@@ -25,11 +25,11 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
   }
 
   return (
-    <div className="rounded-2xl border border-line bg-bg-panel/60 px-5 py-5 shadow-panel md:px-6">
+    <div className="mt-5 rounded-xl border border-line/70 bg-bg-deep/40 px-4 py-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xl">🤝</span>
-          <h2 className="font-display text-sm uppercase tracking-wider text-cyan">Ekipa i podział</h2>
+          <span className="text-xl">💸</span>
+          <h2 className="font-display text-sm uppercase tracking-wider text-cyan">Podział szmalu</h2>
         </div>
         {rows.length > 0 && (
           <span className="text-xs text-muted">

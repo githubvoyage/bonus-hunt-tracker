@@ -11,6 +11,7 @@ import {
 import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
+import NewHuntPrompt from './components/NewHuntPrompt.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
@@ -23,6 +24,7 @@ export default function App() {
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
   const [view, setView] = useState('hunt')
+  const [askingName, setAskingName] = useState(false)
   const [cloudReady, setCloudReady] = useState(false)
   const [syncState, setSyncState] = useState('idle')
 
@@ -120,13 +122,18 @@ export default function App() {
     setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
   }
 
-  // Klik = gotowy hunt. Nazwę, walutę i kasę na start zmienia się potem na
-  // miejscu, w panelu hunta.
-  function handleCreateHunt() {
-    const hunt = createHunt({})
+  // Pytamy tylko o nazwę. Waluta i kasa na start są edytowalne w panelu hunta.
+  function handleCreateHunt(name) {
+    const hunt = createHunt({ name: name.trim() })
     setHunts((prev) => [hunt, ...prev])
     setActiveId(hunt.id)
+    setAskingName(false)
     setView('hunt')
+  }
+
+  function handleAskName() {
+    setView('hunt')
+    setAskingName(true)
   }
 
   function handleDeleteHunt(id) {
@@ -239,7 +246,7 @@ export default function App() {
           hunts={hunts}
           activeId={activeId}
           onSelect={setActiveId}
-          onNew={handleCreateHunt}
+          onNew={handleAskName}
           onDelete={handleDeleteHunt}
           onFinish={handleFinishHunt}
           sendingSummary={sendingSummary}
@@ -252,6 +259,10 @@ export default function App() {
 
         {view === 'hunt' && (
           <>
+            {askingName && (
+              <NewHuntPrompt onCreate={handleCreateHunt} onCancel={() => setAskingName(false)} />
+            )}
+
             {activeHunt && stats && (
               <>
                 <SummaryBar
@@ -260,15 +271,16 @@ export default function App() {
                   onSetName={handleSetName}
                   onSetCurrency={handleSetCurrency}
                   onSetStartBalance={handleSetStartBalance}
-                />
-                <ParticipantsPanel
-                  hunt={activeHunt}
-                  split={split}
-                  onAdd={handleAddParticipant}
-                  onUpdate={handleUpdateParticipant}
-                  onRemove={handleRemoveParticipant}
-                  onSetStartBalance={handleSetStartBalance}
-                />
+                >
+                  <ParticipantsPanel
+                    hunt={activeHunt}
+                    split={split}
+                    onAdd={handleAddParticipant}
+                    onUpdate={handleUpdateParticipant}
+                    onRemove={handleRemoveParticipant}
+                    onSetStartBalance={handleSetStartBalance}
+                  />
+                </SummaryBar>
                 <AddEntryForm onAdd={handleAddEntry} />
                 <EntryTable
                   entries={activeHunt.entries}
@@ -280,7 +292,7 @@ export default function App() {
               </>
             )}
 
-            {!activeHunt && (
+            {!activeHunt && !askingName && (
               <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
                 <div className="mb-3 text-4xl">🎰</div>
                 <p className="font-display text-sm uppercase tracking-wider text-muted">
@@ -288,7 +300,7 @@ export default function App() {
                 </p>
                 <p className="mt-2 text-sm text-muted/70">Klikaj i lecimy.</p>
                 <button
-                  onClick={handleCreateHunt}
+                  onClick={handleAskName}
                   className="btn-jazda mt-5 rounded-lg px-6 py-2.5 font-display text-sm uppercase tracking-wider text-bg shadow-neon-pink transition-transform hover:scale-105"
                 >
                   🚀 Napierdalamy

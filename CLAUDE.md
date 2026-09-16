@@ -62,8 +62,9 @@ src/
   index.css                fonty, tło, neonowe efekty, animacje
   components/
     HuntHeader.jsx         logo, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
-    SummaryBar.jsx         edytowalna nazwa/waluta/kasa na start + statystyki: wygrana, zysk/strata, break-even, pasek postępu
-    ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
+    NewHuntPrompt.jsx      box z nazwą nowego hunta („Jak nazywamy jazdę?”)
+    SummaryBar.jsx         edytowalna nazwa/waluta/kasa na start + statystyki: wygrana, zysk/strata, break-even, pasek postępu; w tej samej ramce siedzi podokno z podziałem
+    ParticipantsPanel.jsx  „Podział szmalu”: kto ile włożył, kto wpłacił, ile komu się należy (podokno SummaryBara)
     AddEntryForm.jsx       dodawanie slota
     EntryTable.jsx         tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
@@ -165,4 +166,4 @@ Dwie pułapki, na które już się nadzialiśmy:
 
 - Nie ma export/import JSON, więc jedyny backup poza przeglądarką to Supabase.
 - „Do zera trzeba” pokazuje `—`, gdy hunt jest już na plusie. Lepiej byłoby wyświetlić np. „✅ Już odrobione”.
-- Nowy hunt powstaje od razu po kliknięciu, bez formularza. Nazwę, walutę i kasę na start zmienia się potem w panelu hunta, klikając w wartość. Kasę da się też zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.
+- Nowy hunt pyta tylko o nazwę. Walutę i kasę na start (oraz nazwę) zmienia się potem w panelu hunta, klikając w wartość — pola do edycji mają przerywaną ramkę i ołówek. Kasę da się też zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.

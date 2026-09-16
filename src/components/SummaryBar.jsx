@@ -46,12 +46,19 @@ function EditableValue({ value, onCommit, className, ...rest }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter') e.currentTarget.blur()
       }}
-      className={`rounded-lg border border-transparent bg-transparent px-2 py-0.5 outline-none transition-colors hover:border-line focus:border-gold focus:bg-bg-deep ${className}`}
+      className={`rounded-lg border border-dashed border-line-bright/70 bg-bg-deep/40 px-2 py-0.5 outline-none transition-colors hover:border-gold/70 focus:border-solid focus:border-gold focus:bg-bg-deep ${className}`}
     />
   )
 }
 
-export default function SummaryBar({ hunt, stats, onSetName, onSetCurrency, onSetStartBalance }) {
+export default function SummaryBar({
+  hunt,
+  stats,
+  onSetName,
+  onSetCurrency,
+  onSetStartBalance,
+  children,
+}) {
   const profitTone = stats.profit > 0 ? 'win' : stats.profit < 0 ? 'loss' : null
   const allOpened = stats.unopenedCount === 0 && stats.count > 0
   const progress = stats.count > 0 ? (stats.openedCount / stats.count) * 100 : 0
@@ -63,13 +70,18 @@ export default function SummaryBar({ hunt, stats, onSetName, onSetCurrency, onSe
       }`}
     >
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <EditableValue
-          value={hunt.name}
-          onCommit={(v) => onSetName(v)}
-          placeholder="Jebanka po wypłacie"
-          title="Kliknij i zmień nazwę hunta"
-          className="min-w-0 flex-1 font-display text-base uppercase tracking-wider text-gold neon-gold placeholder:text-muted/50 md:text-lg"
-        />
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="text-sm text-muted/70" title="Pola z przerywaną ramką można klikać i zmieniać">
+            ✏️
+          </span>
+          <EditableValue
+            value={hunt.name}
+            onCommit={(v) => onSetName(v)}
+            placeholder="Jebanka po wypłacie"
+            title="Kliknij i zmień nazwę hunta"
+            className="min-w-0 flex-1 font-display text-base uppercase tracking-wider text-gold neon-gold placeholder:text-muted/50 md:text-lg"
+          />
+        </div>
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Waluta</span>
           <EditableValue
@@ -146,6 +158,9 @@ export default function SummaryBar({ hunt, stats, onSetName, onSetCurrency, onSe
           )}
         </div>
       </div>
+
+      {/* podokno w tej samej tęczowej ramce: podział szmalu */}
+      {children}
     </div>
   )
 }
