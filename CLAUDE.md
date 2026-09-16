@@ -64,7 +64,7 @@ src/
     HuntHeader.jsx         logo, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
     NewHuntButton.jsx      przycisk „nowy hunt” z dymkiem na nazwę („Jak nazywamy jazdę?”)
     SummaryBar.jsx         edytowalna nazwa/waluta/kasa na start + statystyki: wygrana, zysk/strata, break-even, pasek postępu; w tej samej ramce siedzi podokno z podziałem
-    ParticipantsPanel.jsx  „Podział szmalu”: kto ile włożył, kto wpłacił, ile komu się należy (podokno SummaryBara)
+    ParticipantsPanel.jsx  „Podział szmalu”: podokno SummaryBara; domyślnie sam wynik, dodawanie i zmiany pod przyciskiem edycji
     AddEntryForm.jsx       dodawanie slota
     EntryTable.jsx         tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti

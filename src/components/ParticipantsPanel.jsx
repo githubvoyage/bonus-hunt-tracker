@@ -6,6 +6,9 @@ const inputCls =
   'rounded-lg border border-line bg-bg-deep px-3 py-2 text-cream transition-colors placeholder:text-muted/50 focus:border-cyan'
 
 export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemove, onSetStartBalance }) {
+  // Domyślnie widać sam wynik podziału. Dodawanie ekipy i grzebanie w składzie
+  // siedzi pod przyciskiem, żeby w trakcie hunta nie kradło uwagi.
+  const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
   const [paidBy, setPaidBy] = useState('')
@@ -31,56 +34,72 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
           <span className="text-xl">💸</span>
           <h2 className="font-display text-sm uppercase tracking-wider text-cyan">Podział szmalu</h2>
         </div>
-        {rows.length > 0 && (
-          <span className="text-xs text-muted">
-            Wkłady razem <span className="font-mono text-cream">{formatMoney(totalIn, currency)}</span>
-            {' · '}do podziału{' '}
-            <span className="font-mono text-gold">{formatMoney(totalWin, currency)}</span>
-          </span>
-        )}
+
+        <div className="flex flex-wrap items-center gap-3">
+          {rows.length > 0 && (
+            <span className="text-xs text-muted">
+              Wkłady razem{' '}
+              <span className="font-mono text-cream">{formatMoney(totalIn, currency)}</span>
+              {' · '}do podziału{' '}
+              <span className="font-mono text-gold">{formatMoney(totalWin, currency)}</span>
+            </span>
+          )}
+          <button
+            onClick={() => setEditing((v) => !v)}
+            className={`rounded-lg border px-3 py-1.5 font-display text-[10px] uppercase tracking-wider transition-all ${
+              editing
+                ? 'border-cyan text-cyan shadow-neon-cyan'
+                : 'border-line text-muted hover:border-cyan hover:text-cyan'
+            }`}
+          >
+            {editing ? '✓ Gotowe' : rows.length > 0 ? '✏️ Zmień ekipę' : '+ Zbierz ekipę'}
+          </button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label className={labelCls}>Imię</label>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Michał"
-            className={`w-40 ${inputCls}`}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className={labelCls}>Wkład</label>
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            inputMode="decimal"
-            placeholder="20.00"
-            className={`w-28 font-mono ${inputCls}`}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className={labelCls}>Kto wpłacił na kasynko</label>
-          <select value={paidBy} onChange={(e) => setPaidBy(e.target.value)} className={`w-44 ${inputCls}`}>
-            <option value="">Sam za siebie</option>
-            {rows.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg bg-cyan px-5 py-2.5 font-display text-xs uppercase tracking-wider text-bg shadow-neon-cyan transition-transform hover:scale-105"
-        >
-          + Dorzuć do ekipy
-        </button>
-      </form>
+      {editing && (
+        <form onSubmit={handleSubmit} className="mb-4 flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label className={labelCls}>Imię</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Michał"
+              className={`w-40 ${inputCls}`}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className={labelCls}>Wkład</label>
+            <input
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              inputMode="decimal"
+              placeholder="20.00"
+              className={`w-28 font-mono ${inputCls}`}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className={labelCls}>Kto wpłacił na kasynko</label>
+            <select value={paidBy} onChange={(e) => setPaidBy(e.target.value)} className={`w-44 ${inputCls}`}>
+              <option value="">Sam za siebie</option>
+              {rows.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="rounded-lg bg-cyan px-5 py-2.5 font-display text-xs uppercase tracking-wider text-bg shadow-neon-cyan transition-transform hover:scale-105"
+          >
+            + Dorzuć do ekipy
+          </button>
+        </form>
+      )}
 
-      {mismatch && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-gold/40 bg-gold/5 px-3 py-2 text-xs text-gold">
+      {editing && mismatch && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-gold/40 bg-gold/5 px-3 py-2 text-xs text-gold">
           <span>
             ⚠ Suma wkładów {formatMoney(totalIn, currency)} ≠ kasa na start{' '}
             {formatMoney(startBalance, currency)}
@@ -95,12 +114,12 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
       )}
 
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-muted/70">
-          Nikt się jeszcze nie zrzucił. Dodaj ekipę, a policzę kto ile dostaje.
+        <p className="text-sm text-muted/70">
+          Nikt się jeszcze nie zrzucił. Zbierz ekipę, a policzę kto ile dostaje.
         </p>
       ) : (
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[620px] text-sm">
+        <div className="overflow-x-auto">
+          <table className={`w-full text-sm ${editing ? 'min-w-[620px]' : 'min-w-[420px]'}`}>
             <thead>
               <tr className="border-b border-line text-left font-display text-[10px] uppercase tracking-wider text-muted">
                 <th className="py-2 pr-3">Kto</th>
@@ -108,7 +127,7 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
                 <th className="py-2 pr-3 text-right">Udział</th>
                 <th className="py-2 pr-3">Kto wpłacił</th>
                 <th className="py-2 pr-3 text-right">Do wypłaty</th>
-                <th className="py-2"></th>
+                {editing && <th className="py-2"></th>}
               </tr>
             </thead>
             <tbody>
@@ -122,19 +141,25 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
                     {(r.share * 100).toFixed(1)}%
                   </td>
                   <td className="py-2 pr-3">
-                    <select
-                      value={r.paidBy || r.id}
-                      onChange={(e) =>
-                        onUpdate(r.id, { paidBy: e.target.value === r.id ? null : e.target.value })
-                      }
-                      className="rounded-md border border-line bg-bg-deep px-2 py-1 text-xs text-cream focus:border-cyan"
-                    >
-                      {rows.map((o) => (
-                        <option key={o.id} value={o.id}>
-                          {o.id === r.id ? 'Sam za siebie' : o.name}
-                        </option>
-                      ))}
-                    </select>
+                    {editing ? (
+                      <select
+                        value={r.paidBy || r.id}
+                        onChange={(e) =>
+                          onUpdate(r.id, { paidBy: e.target.value === r.id ? null : e.target.value })
+                        }
+                        className="rounded-md border border-line bg-bg-deep px-2 py-1 text-xs text-cream focus:border-cyan"
+                      >
+                        {rows.map((o) => (
+                          <option key={o.id} value={o.id}>
+                            {o.id === r.id ? 'Sam za siebie' : o.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-xs text-muted">
+                        {r.paidBy ? rows.find((o) => o.id === r.paidBy)?.name : 'sam za siebie'}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 pr-3 text-right">
                     <div
@@ -160,15 +185,17 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
                       </div>
                     )}
                   </td>
-                  <td className="py-3 text-right">
-                    <button
-                      onClick={() => onRemove(r.id)}
-                      className="text-muted transition-colors hover:text-loss"
-                      title="Usuń z ekipy"
-                    >
-                      ✕
-                    </button>
-                  </td>
+                  {editing && (
+                    <td className="py-3 text-right">
+                      <button
+                        onClick={() => onRemove(r.id)}
+                        className="text-muted transition-colors hover:text-loss"
+                        title="Usuń z ekipy"
+                      >
+                        ✕
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
