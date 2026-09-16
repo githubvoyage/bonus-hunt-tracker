@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadHunts, saveHunts, createHunt, createEntry, createParticipant } from './storage.js'
 import {
   cloudEnabled,
@@ -28,6 +28,11 @@ export default function App() {
   const [cloudReady, setCloudReady] = useState(false)
   const [syncState, setSyncState] = useState('idle')
 
+  // Efekty synchronizacji czytają stan przez ref, żeby nie restartować się
+  // przy każdej zmianie huntów.
+  const huntsRef = useRef(hunts)
+  huntsRef.current = hunts
+
   useEffect(() => {
     const stored = loadHunts()
     setHunts(stored)
@@ -54,7 +59,10 @@ export default function App() {
         if (alive) setSyncState('error')
       })
 
-    const unsubscribe = subscribeToHunts((merge) => setHunts((prev) => merge(prev)))
+    const unsubscribe = subscribeToHunts(
+      () => huntsRef.current,
+      (merged) => setHunts(merged)
+    )
     return () => {
       alive = false
       unsubscribe()
@@ -65,24 +73,38 @@ export default function App() {
     if (loaded) saveHunts(hunts)
   }, [hunts, loaded])
 
-  // Wypychanie zmian do chmury, z chwilą zwłoki, żeby wpisywanie wygranej
-  // nie robiło zapytania na każdy wciśnięty klawisz.
+  // Wypychanie zmian do chmury. Zwykły ticker, a nie debounce na zmianie stanu:
+  // eventy z realtime przeplatają się z lokalnymi zmianami i potrafiły ubić
+  // zaplanowany timer, przez co zmiana zostawała w przeglądarce. Przy okazji
+  // nieudany push sam się ponawia przy następnym tyknięciu.
   useEffect(() => {
     if (!cloudReady) return
-    const dirty = pendingPush(hunts)
-    if (dirty.length === 0) return
-    const timer = setTimeout(async () => {
+    let stopped = false
+    let busy = false
+
+    async function tick() {
+      if (busy || stopped) return
+      const dirty = pendingPush(huntsRef.current)
+      if (dirty.length === 0) return
+      busy = true
       setSyncState('syncing')
       try {
         for (const hunt of dirty) await pushHunt(hunt)
-        setSyncState('idle')
+        if (!stopped) setSyncState('idle')
       } catch (e) {
         console.error('Nie udało się zapisać hunta w chmurze', e)
-        setSyncState('error')
+        if (!stopped) setSyncState('error')
+      } finally {
+        busy = false
       }
-    }, 700)
-    return () => clearTimeout(timer)
-  }, [hunts, cloudReady])
+    }
+
+    const timer = setInterval(tick, 1200)
+    return () => {
+      stopped = true
+      clearInterval(timer)
+    }
+  }, [cloudReady])
 
   // Hunt mógł zniknąć przez kasowanie na innym urządzeniu.
   useEffect(() => {

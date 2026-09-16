@@ -138,20 +138,30 @@ export async function pushDelete(id) {
 }
 
 /**
- * Nasłuch zmian z innych urządzeń. `onChange` dostaje funkcję scalającą,
- * którą wołamy na aktualnym stanie, żeby nie nadpisać czegoś, co ktoś
- * właśnie wpisał lokalnie.
+ * Nasłuch zmian z innych urządzeń.
+ *
+ * `getLocal` zwraca aktualny stan, `onMerged` dostaje gotowy wynik scalania.
+ * Scalanie musi się dziać tutaj, a nie w funkcji aktualizującej stan Reacta:
+ * ma skutki uboczne (znaczniki czasu), a React w StrictMode woła updater dwa
+ * razy i drugie przejście cofało właśnie przyjętą zmianę.
  */
-export function subscribeToHunts(onChange) {
+export function subscribeToHunts(getLocal, onMerged) {
   if (!supabase) return () => {}
+  // Nazwa kanału musi być unikalna. Przy stałej nazwie drugie wejście w efekt
+  // (React StrictMode montuje go dwa razy) tworzy kanał o tym samym temacie,
+  // który ginie razem z pierwszym, i nasłuch po cichu przestaje działać.
   const channel = supabase
-    .channel('hunts-sync')
+    .channel(`hunts-sync-${Math.random().toString(36).slice(2)}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'hunts' }, (payload) => {
       const row = payload.new
       if (!row || !row.id) return
-      onChange((local) => mergeHunts(local, [row]))
+      const local = getLocal()
+      const merged = mergeHunts(local, [row])
+      if (JSON.stringify(merged) !== JSON.stringify(local)) onMerged(merged)
     })
-    .subscribe()
+    .subscribe((status, err) => {
+      if (err) console.error('Kanał realtime padł', status, err)
+    })
 
   return () => {
     supabase.removeChannel(channel)

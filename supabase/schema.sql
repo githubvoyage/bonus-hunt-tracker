@@ -29,6 +29,11 @@ create trigger hunts_touch_updated_at
   before insert or update on public.hunts
   for each row execute function public.hunts_touch_updated_at();
 
+-- Same polityki RLS nie wystarczą: rola `anon` potrzebuje jeszcze uprawnień
+-- na tabeli, inaczej REST oddaje 401 "permission denied for table hunts".
+grant usage on schema public to anon, authenticated;
+grant select, insert, update on public.hunts to anon, authenticated;
+
 -- RLS: apka nie ma logowania, więc anon może wszystko na tej jednej tabeli.
 -- Kto zna adres apki, ten może czytać i pisać hunty. Świadoma decyzja.
 alter table public.hunts enable row level security;

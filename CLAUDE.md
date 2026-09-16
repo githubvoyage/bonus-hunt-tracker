@@ -157,6 +157,11 @@ Opcjonalna. Bez zmiennych `VITE_SUPABASE_URL` i `VITE_SUPABASE_ANON_KEY` apka dz
 - Kasowanie hunta to update z `deleted = true` (tombstone), inaczej inne urządzenia wskrzesiłyby go przy następnym pushu.
 - Nigdy nie używaj klucza `service_role`. Wszystko z prefiksem `VITE_` ląduje w zbudowanym JS.
 
+Dwie pułapki, na które już się nadzialiśmy:
+
+- Same polityki RLS nie wystarczą, rola `anon` potrzebuje jeszcze `GRANT`-ów na tabeli. Bez nich REST oddaje 401 `permission denied for table hunts`. Granty są w `schema.sql`.
+- Scalanie danych z chmury nie może siedzieć w funkcji aktualizującej stan (`setHunts(prev => ...)`). Ma skutki uboczne, a React w StrictMode woła updater dwa razy i drugie przejście cofa świeżo przyjętą zmianę. Dlatego `subscribeToHunts` dostaje getter stanu i scala poza Reactem. Z tego samego powodu kanał realtime ma losową nazwę: przy stałej drugi montaż efektu ubijał nasłuch.
+
 ## Znane ograniczenia i pomysły na dalej
 
 - Nie ma export/import JSON, więc jedyny backup poza przeglądarką to Supabase.
