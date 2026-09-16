@@ -55,6 +55,7 @@ src/
   App.jsx                  cały stan aplikacji + handlery + zapis do localStorage
   calc.js                  cała matematyka (czyste funkcje): huntStats, overallStats, splitPayouts, formatowanie
   storage.js               odczyt/zapis localStorage + fabryki: createHunt, createEntry, createParticipant
+  cloud.js                 synchronizacja huntów z Supabase (opcjonalna, scalanie i realtime)
   discord.js               budowa i wysyłka podsumowania hunta na webhook Discorda
   wheel.js                 losowanie ważone i localStorage koła zrzutki (czyste funkcje)
   confetti.js              efekt konfetti na canvasie, bez zależności
@@ -145,8 +146,19 @@ Wymagania:
 - Apka musi działać na telefonie (~375px szerokości). Tabele trzymaj w `overflow-x-auto`, a wiersze formularzy w `flex-wrap`.
 - Kwoty zawsze formatuj przez `formatMoney(value, hunt.currency)`, a multi przez `formatMult`.
 
+## Synchronizacja z chmurą (Supabase)
+
+Opcjonalna. Bez zmiennych `VITE_SUPABASE_URL` i `VITE_SUPABASE_ANON_KEY` apka działa dokładnie jak wcześniej: sam `localStorage`, `cloud.js` jest wtedy no-opem. Ustaw je w `.env.local` lokalnie i w panelu Vercela na produkcji, wzór jest w `.env.example`.
+
+- Schemat bazy leży w `supabase/schema.sql`, wklejasz go w SQL Editor w Supabase. Jeden wiersz = jeden hunt, cały JSON w kolumnie `data`, więc zmiana kształtu hunta nie wymaga migracji.
+- **Bez logowania.** RLS pozwala roli `anon` czytać i pisać, czyli kto zna adres apki, ten widzi i edytuje hunty ekipy. Świadoma decyzja, nie przeoczenie. Jeśli kiedyś ma to być prywatne, trzeba dołożyć Supabase Auth i polityki po `user_id`.
+- `localStorage` zostaje źródłem prawdy na czas offline. Przy starcie robimy pull i scalamy, potem realtime dosyła zmiany z innych urządzeń, a lokalne zmiany lecą w górę po ~700 ms zwłoki.
+- Konflikty rozstrzyga nowszy `updated_at`, czyli ostatni zapis wygrywa. Znaczniki czasu z serwera trzymamy w `bonushunt.sync.v1`, osobno od huntów, żeby nie ruszać ich kształtu.
+- Kasowanie hunta to update z `deleted = true` (tombstone), inaczej inne urządzenia wskrzesiłyby go przy następnym pushu.
+- Nigdy nie używaj klucza `service_role`. Wszystko z prefiksem `VITE_` ląduje w zbudowanym JS.
+
 ## Znane ograniczenia i pomysły na dalej
 
-- Brak synchronizacji między urządzeniami, bo dane żyją tylko w jednej przeglądarce. Możliwe kierunki: export/import JSON albo backend typu Supabase.
+- Nie ma export/import JSON, więc jedyny backup poza przeglądarką to Supabase.
 - „Do zera trzeba” pokazuje `—`, gdy hunt jest już na plusie. Lepiej byłoby wyświetlić np. „✅ Już odrobione”.
 - Nie ma edycji kasy na start ani nazwy hunta po utworzeniu. Kasę da się tylko zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.

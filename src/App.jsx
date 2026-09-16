@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadHunts, saveHunts, createHunt, createEntry, createParticipant } from './storage.js'
+import {
+  cloudEnabled,
+  pullHunts,
+  pushHunt,
+  pushDelete,
+  pendingPush,
+  subscribeToHunts,
+} from './cloud.js'
 import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
@@ -17,6 +25,8 @@ export default function App() {
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
   const [view, setView] = useState('hunt')
+  const [cloudReady, setCloudReady] = useState(false)
+  const [syncState, setSyncState] = useState('idle')
 
   useEffect(() => {
     const stored = loadHunts()
@@ -24,11 +34,61 @@ export default function App() {
     if (stored.length > 0) setActiveId(stored[0].id)
     else setShowNewForm(true)
     setLoaded(true)
+
+    if (!cloudEnabled) return
+    let alive = true
+    setSyncState('syncing')
+    pullHunts(stored)
+      .then((merged) => {
+        if (!alive) return
+        setHunts(merged)
+        if (merged.length > 0) {
+          setActiveId((cur) => (cur && merged.some((h) => h.id === cur) ? cur : merged[0].id))
+          setShowNewForm(false)
+        }
+        setCloudReady(true)
+        setSyncState('idle')
+      })
+      .catch((e) => {
+        console.error('Nie udało się pobrać huntów z chmury', e)
+        if (alive) setSyncState('error')
+      })
+
+    const unsubscribe = subscribeToHunts((merge) => setHunts((prev) => merge(prev)))
+    return () => {
+      alive = false
+      unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
     if (loaded) saveHunts(hunts)
   }, [hunts, loaded])
+
+  // Wypychanie zmian do chmury, z chwilą zwłoki, żeby wpisywanie wygranej
+  // nie robiło zapytania na każdy wciśnięty klawisz.
+  useEffect(() => {
+    if (!cloudReady) return
+    const dirty = pendingPush(hunts)
+    if (dirty.length === 0) return
+    const timer = setTimeout(async () => {
+      setSyncState('syncing')
+      try {
+        for (const hunt of dirty) await pushHunt(hunt)
+        setSyncState('idle')
+      } catch (e) {
+        console.error('Nie udało się zapisać hunta w chmurze', e)
+        setSyncState('error')
+      }
+    }, 700)
+    return () => clearTimeout(timer)
+  }, [hunts, cloudReady])
+
+  // Hunt mógł zniknąć przez kasowanie na innym urządzeniu.
+  useEffect(() => {
+    if (!loaded || !activeId) return
+    if (!hunts.some((h) => h.id === activeId)) setActiveId(hunts.length > 0 ? hunts[0].id : null)
+  }, [hunts, activeId, loaded])
 
   const overall = useMemo(() => overallStats(hunts), [hunts])
   const activeHunt = useMemo(() => hunts.find((h) => h.id === activeId) || null, [hunts, activeId])
@@ -60,6 +120,12 @@ export default function App() {
       }
       return next
     })
+    if (cloudReady) {
+      pushDelete(id).catch((e) => {
+        console.error('Nie udało się skasować hunta w chmurze', e)
+        setSyncState('error')
+      })
+    }
   }
 
   function handleAddEntry({ name, bet }) {
@@ -144,6 +210,26 @@ export default function App() {
   return (
     <div className="min-h-screen px-4 py-6 md:px-10 md:py-8">
       <div className="mx-auto max-w-5xl space-y-6">
+        {cloudEnabled && (
+          <div className="flex justify-end">
+            <span
+              className={`rounded-full border px-3 py-1 font-mono text-[11px] uppercase tracking-wider ${
+                syncState === 'error'
+                  ? 'border-loss/50 text-loss'
+                  : syncState === 'syncing'
+                    ? 'border-line-bright text-muted'
+                    : 'border-cyan/40 text-cyan'
+              }`}
+            >
+              {syncState === 'error'
+                ? '⚠ chmura padła, gram lokalnie'
+                : syncState === 'syncing'
+                  ? '⟳ zgrywam z ekipą…'
+                  : '☁ ekipa widzi to samo'}
+            </span>
+          </div>
+        )}
+
         <HuntHeader
           hunts={hunts}
           activeId={activeId}
