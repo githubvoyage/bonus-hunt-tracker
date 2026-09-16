@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadHunts, saveHunts, createHunt, createEntry, createParticipant } from './storage.js'
-import { huntStats, splitPayouts } from './calc.js'
+import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntForm from './components/NewHuntForm.jsx'
+import OverallStatsBar from './components/OverallStatsBar.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
@@ -30,6 +31,7 @@ export default function App() {
     if (loaded) saveHunts(hunts)
   }, [hunts, loaded])
 
+  const overall = useMemo(() => overallStats(hunts), [hunts])
   const activeHunt = useMemo(() => hunts.find((h) => h.id === activeId) || null, [hunts, activeId])
   const stats = useMemo(() => (activeHunt ? huntStats(activeHunt) : null), [activeHunt])
   const split = useMemo(
@@ -159,6 +161,8 @@ export default function App() {
 
         {view === 'hunt' && (
           <>
+            <OverallStatsBar groups={overall} />
+
             {showNewForm && (
               <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
             )}

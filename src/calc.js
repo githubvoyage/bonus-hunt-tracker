@@ -27,6 +27,25 @@ export function huntStats(hunt) {
   }
 }
 
+// bilans zbiorczy ze wszystkich huntów, pogrupowany po walucie (żeby nie mieszać € z $)
+export function overallStats(hunts = []) {
+  const groups = new Map()
+  for (const hunt of hunts) {
+    const currency = hunt.currency || '€'
+    const stats = huntStats(hunt)
+    const g = groups.get(currency) || { currency, huntCount: 0, startBalance: 0, totalWin: 0 }
+    g.huntCount += 1
+    g.startBalance += stats.startBalance
+    g.totalWin += stats.totalWin
+    groups.set(currency, g)
+  }
+  return Array.from(groups.values()).map((g) => ({
+    ...g,
+    profit: g.totalWin - g.startBalance,
+    overallMultiplier: g.startBalance > 0 ? g.totalWin / g.startBalance : 0,
+  }))
+}
+
 export function splitPayouts(participants = [], totalWin = 0) {
   const totalIn = participants.reduce((s, p) => s + (Number(p.amount) || 0), 0)
   const rows = participants.map((p) => {

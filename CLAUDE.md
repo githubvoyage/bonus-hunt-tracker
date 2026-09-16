@@ -53,7 +53,7 @@ React 18 + Vite 5 + Tailwind CSS 3. Żadnych innych zależności runtime. Nie do
 ```
 src/
   App.jsx                  cały stan aplikacji + handlery + zapis do localStorage
-  calc.js                  cała matematyka (czyste funkcje): huntStats, splitPayouts, formatowanie
+  calc.js                  cała matematyka (czyste funkcje): huntStats, overallStats, splitPayouts, formatowanie
   storage.js               odczyt/zapis localStorage + fabryki: createHunt, createEntry, createParticipant
   discord.js               budowa i wysyłka podsumowania hunta na webhook Discorda
   wheel.js                 losowanie ważone i localStorage koła zrzutki (czyste funkcje)
@@ -62,6 +62,7 @@ src/
   components/
     HuntHeader.jsx         logo, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
     NewHuntForm.jsx        formularz nowego hunta (przycisk „Napierdalamy”)
+    OverallStatsBar.jsx    zbiorczy bilans ze wszystkich huntów, pogrupowany po walucie
     SummaryBar.jsx         statystyki: kasa na start, wygrana, zysk/strata, break-even, pasek postępu
     ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
     AddEntryForm.jsx       dodawanie slota
@@ -106,6 +107,7 @@ Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentag
 - **Ogólny multi** = suma wygranych ÷ kasa na start.
 - **Do zera trzeba (break-even)** = (kasa na start − suma wygranych) ÷ suma betów nieotwartych slotów. Gdy jesteś już na plusie, wynik to `null` i wyświetla się `—`.
 - **Multi slota** = wygrana ÷ bet.
+- **Bilans wszystkich huntów** (`overallStats`) = suma kasy na start i suma wygranych ze wszystkich huntów, policzona osobno dla każdej waluty (nie sumuj € z $).
 - **Podział dla ekipy** (`splitPayouts`):
   - udział = wkład osoby ÷ suma wkładów,
   - wypłata brutto = aktualna suma wygranych × udział,
