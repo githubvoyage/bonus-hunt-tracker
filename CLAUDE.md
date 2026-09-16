@@ -110,7 +110,8 @@ Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentag
 - **Do zera trzeba (break-even)** = (kasa na start − suma wygranych) ÷ suma betów nieotwartych slotów. Gdy jesteś już na plusie, wynik to `null` i wyświetla się `—`.
 - **Multi slota** = wygrana ÷ bet.
 - **Bilans wszystkich huntów** (`overallStats`) = suma kasy na start i suma wygranych ze wszystkich huntów, policzona osobno dla każdej waluty (nie sumuj € z $).
-- **Rankingi** (`computeRankings(hunts, limit=10)`) = top-N tabelki po wszystkich otwartych slotach ze wszystkich huntów, przełączane zakładkami w `RankingsPanel`: największe/najmniejsze wygrane, największy/najmniejszy multi, najczęściej grane. Kwoty (wygrane) liczone osobno per waluta jak w `overallStats`; multi jest bezwymiarowe, więc jedna wspólna tabelka bez podziału na walutę.
+- **Rankingi** (`computeRankings(hunts, limit=10)`) = top-N tabelki po wszystkich otwartych slotach ze wszystkich huntów, przełączane zakładkami w `RankingsPanel`: największe/najmniejsze wygrane, największy/najmniejszy multi, najczęściej grane, hot/cold sloty. Kwoty (wygrane) liczone osobno per waluta jak w `overallStats`; multi jest bezwymiarowe, więc jedna wspólna tabelka bez podziału na walutę.
+- **Hot/cold sloty** = per nazwa slota (nie per wpis) liczymy ile razy wygrana była większa od beta (na plusie) a ile razy mniejsza (na minusie); wynik = plus − minus. Hot sortuje malejąco po wyniku, cold rosnąco, remisy rozstrzyga liczba gier.
 - **Baza slotów** (`knownSlotNames`) = unikalne nazwy slotów wpisane kiedykolwiek w dowolnym huncie, posortowane od najczęściej granych — brak osobnego klucza w localStorage, liczone w locie z `hunts`. Zasila `datalist` w `AddEntryForm`.
 - **Podział dla ekipy** (`splitPayouts`):
   - udział = wkład osoby ÷ suma wkładów,

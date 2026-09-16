@@ -7,6 +7,8 @@ const TABS = [
   { key: 'bestMult', label: 'Największy multi', icon: '🚀' },
   { key: 'worstMult', label: 'Najmniejszy multi', icon: '🧊' },
   { key: 'mostPlayed', label: 'Najczęściej grane', icon: '🎡' },
+  { key: 'hotSlots', label: 'Hot sloty', icon: '🔥' },
+  { key: 'coldSlots', label: 'Cold sloty', icon: '🥶' },
 ]
 
 const thCls = 'py-2 pr-3 text-left'
@@ -116,6 +118,25 @@ function MostPlayedTable({ rows }) {
   )
 }
 
+function HotColdTable({ rows }) {
+  return (
+    <Table>
+      <Thead columns={['Slot', 'Grane', 'Na plusie', 'Na minusie']} />
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={r.name} className="border-b border-line/50">
+            <td className="py-2 pl-3 font-mono text-xs text-muted">{i + 1}</td>
+            <td className={tdName}>{r.name}</td>
+            <td className={tdRight}>{r.plays}×</td>
+            <td className={`${tdRight} font-bold text-win`}>{r.plus}×</td>
+            <td className={`${tdRight} font-bold text-loss`}>{r.minus}×</td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+
 export default function RankingsPanel({ hunts }) {
   const data = useMemo(() => computeRankings(hunts, 10), [hunts])
   const [tab, setTab] = useState('bestWin')
@@ -168,6 +189,14 @@ export default function RankingsPanel({ hunts }) {
       {tab === 'bestMult' && <MultTable rows={data.bestMult} />}
       {tab === 'worstMult' && <MultTable rows={data.worstMult} />}
       {tab === 'mostPlayed' && <MostPlayedTable rows={data.mostPlayed} />}
+      {(tab === 'hotSlots' || tab === 'coldSlots') && (
+        <>
+          <p className="mb-3 text-xs text-muted/70">
+            Na plusie = wygrana większa niż bet. Na minusie = wygrana mniejsza niż bet.
+          </p>
+          <HotColdTable rows={tab === 'hotSlots' ? data.hotSlots : data.coldSlots} />
+        </>
+      )}
     </div>
   )
 }

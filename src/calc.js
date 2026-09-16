@@ -110,11 +110,29 @@ export function computeRankings(hunts = [], limit = 10) {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
     .slice(0, limit)
 
+  // hot/cold: ile razy dany slot (po nazwie) wypłacił więcej niż bet, a ile razy mniej —
+  // niezależnie od waluty, bo liczymy tylko wynik spinu (plus/minus), nie kwotę
+  const slotAgg = new Map()
+  for (const e of opened) {
+    const g = slotAgg.get(e.name) || { name: e.name, plays: 0, plus: 0, minus: 0 }
+    g.plays += 1
+    if (e.win > e.bet) g.plus += 1
+    else if (e.win < e.bet) g.minus += 1
+    slotAgg.set(e.name, g)
+  }
+  const slotList = Array.from(slotAgg.values()).map((g) => ({ ...g, score: g.plus - g.minus }))
+  const byHotCold = (dir) => (a, b) =>
+    dir * (b.score - a.score) || b.plays - a.plays || a.name.localeCompare(b.name)
+  const hotSlots = [...slotList].sort(byHotCold(1)).slice(0, limit)
+  const coldSlots = [...slotList].sort(byHotCold(-1)).slice(0, limit)
+
   return {
     totalOpened: opened.length,
     avgMult,
     bestWin: topByCurrency((a, b) => b.win - a.win),
     worstWin: topByCurrency((a, b) => a.win - b.win),
+    hotSlots,
+    coldSlots,
     bestMult: [...withMult].sort((a, b) => b.multiplier - a.multiplier).slice(0, limit),
     worstMult: [...withMult].sort((a, b) => a.multiplier - b.multiplier).slice(0, limit),
     mostPlayed,
