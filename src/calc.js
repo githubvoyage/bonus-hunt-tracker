@@ -46,6 +46,26 @@ export function overallStats(hunts = []) {
   }))
 }
 
+// ranking huntów po wyniku. Sortujemy po multi (bezwymiarowe), nie po zysku w
+// kasie, bo zysk w € i w $ nie da się uczciwie porównać w jednej tabelce.
+export function bestHunts(hunts = [], limit = 10) {
+  return hunts
+    .map((hunt) => {
+      const stats = huntStats(hunt)
+      return {
+        id: hunt.id,
+        name: hunt.name,
+        currency: hunt.currency || '€',
+        startBalance: stats.startBalance,
+        totalWin: stats.totalWin,
+        profit: stats.profit,
+        overallMultiplier: stats.overallMultiplier,
+      }
+    })
+    .sort((a, b) => b.overallMultiplier - a.overallMultiplier)
+    .slice(0, limit)
+}
+
 // unikalne nazwy slotów ze wszystkich huntów, najczęściej grane na górze — pod autouzupełnianie
 export function knownSlotNames(hunts = []) {
   const counts = new Map()

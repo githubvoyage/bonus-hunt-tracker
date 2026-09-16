@@ -27,6 +27,7 @@ export default function SummaryBar({
   onSetName,
   onSetCurrency,
   onSetStartBalance,
+  guardEdit,
   children,
 }) {
   const profitTone = stats.profit > 0 ? 'win' : stats.profit < 0 ? 'loss' : null
@@ -47,6 +48,7 @@ export default function SummaryBar({
           <EditableValue
             value={hunt.name}
             onCommit={(v) => onSetName(v)}
+            guard={() => guardEdit('zmienić nazwę hunta')}
             placeholder="Jebanka po wypłacie"
             title="Kliknij i zmień nazwę hunta"
             className="min-w-0 flex-1 font-display text-base uppercase tracking-wider text-gold neon-gold placeholder:text-muted/50 md:text-lg"
@@ -57,6 +59,7 @@ export default function SummaryBar({
           <EditableValue
             value={hunt.currency}
             onCommit={(v) => onSetCurrency(v)}
+            guard={() => guardEdit('zmienić walutę')}
             title="Kliknij i zmień walutę"
             className="w-14 text-center font-mono text-cream"
           />
@@ -75,6 +78,7 @@ export default function SummaryBar({
             <EditableValue
               value={hunt.startBalance}
               onCommit={(v) => onSetStartBalance(v)}
+              guard={() => guardEdit('zmienić kasę na start')}
               inputMode="decimal"
               placeholder="0"
               title="Kliknij i wpisz, ile poszło na start"

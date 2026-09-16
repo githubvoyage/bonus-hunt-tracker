@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
  * i oddaje wartość dopiero przy wyjściu z pola albo Enterze.
  * Przerywana ramka jest sygnałem, że to się klika i zmienia.
  */
-export default function EditableValue({ value, onCommit, className, ...rest }) {
+export default function EditableValue({ value, onCommit, guard, className, ...rest }) {
   const [draft, setDraft] = useState(String(value ?? ''))
 
   useEffect(() => {
@@ -18,6 +18,11 @@ export default function EditableValue({ value, onCommit, className, ...rest }) {
       {...rest}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
+      onFocus={(e) => {
+        // guard() pyta „na pewno?", gdy edycja wymaga potwierdzenia (np. hunt
+        // już zakończony) — odmowa od razu zabiera focus, zanim ktoś zdąży pisać
+        if (guard && !guard()) e.target.blur()
+      }}
       onBlur={() => onCommit(draft)}
       onKeyDown={(e) => {
         if (e.key === 'Enter') e.currentTarget.blur()

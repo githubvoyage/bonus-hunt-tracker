@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { computeRankings, formatMoney, formatMult } from '../calc.js'
+import { bestHunts, computeRankings, formatMoney, formatMult } from '../calc.js'
 
 const TABS = [
+  { key: 'bestHunts', label: 'Najlepsze hunty', icon: '🏅' },
   { key: 'bestWin', label: 'Największe wygrane', icon: '🏆' },
   { key: 'worstWin', label: 'Najmniejsze wygrane', icon: '💀' },
   { key: 'bestMult', label: 'Największy multi', icon: '🚀' },
@@ -118,6 +119,31 @@ function MostPlayedTable({ rows }) {
   )
 }
 
+function HuntRankingTable({ rows }) {
+  return (
+    <Table>
+      <Thead columns={['Hunt', 'Kasa na start', 'Wygrana', 'Zysk / strata', 'Multi']} />
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={r.id} className="border-b border-line/50">
+            <td className="py-2 pl-3 font-mono text-xs text-muted">{i + 1}</td>
+            <td className={tdName}>{r.name}</td>
+            <td className={tdRight}>{formatMoney(r.startBalance, r.currency)}</td>
+            <td className={`${tdRight} font-bold text-gold`}>{formatMoney(r.totalWin, r.currency)}</td>
+            <td className={`${tdRight} font-bold ${r.profit >= 0 ? 'text-win' : 'text-loss'}`}>
+              {r.profit >= 0 ? '+' : ''}
+              {formatMoney(r.profit, r.currency)}
+            </td>
+            <td className={`${tdRight} font-bold ${multClass(r.overallMultiplier)}`}>
+              {formatMult(r.overallMultiplier)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+
 function HotColdTable({ rows }) {
   return (
     <Table>
@@ -137,18 +163,27 @@ function HotColdTable({ rows }) {
   )
 }
 
+function NoSlotsNote() {
+  return (
+    <p className="text-sm text-muted/70">
+      Brak otwartych slotów — nie ma jeszcze czego rankingować w tej kategorii.
+    </p>
+  )
+}
+
 export default function RankingsPanel({ hunts }) {
   const data = useMemo(() => computeRankings(hunts, 10), [hunts])
-  const [tab, setTab] = useState('bestWin')
+  const huntRanking = useMemo(() => bestHunts(hunts, 10), [hunts])
+  const [tab, setTab] = useState('bestHunts')
 
-  if (!data) {
+  if (hunts.length === 0) {
     return (
       <div className="gradient-frame rounded-2xl px-5 py-14 text-center shadow-panel md:px-6">
         <div className="mb-3 text-4xl">🏆</div>
         <p className="font-display text-sm uppercase tracking-wider text-muted">
           Pusto jak w portfelu
         </p>
-        <p className="mt-2 text-sm text-muted/70">Otwórz parę slotów, to będzie co rankingować.</p>
+        <p className="mt-2 text-sm text-muted/70">Odpal hunta, to będzie co rankingować.</p>
       </div>
     )
   }
@@ -162,11 +197,13 @@ export default function RankingsPanel({ hunts }) {
         </h2>
         <span className="text-xs text-muted">ze wszystkich huntów razem</span>
       </div>
-      <p className="mb-4 text-xs text-muted">
-        Średni multi <span className="font-mono text-cream">{formatMult(data.avgMult)}</span>
-        {' · '}
-        {data.totalOpened} otwartych slotów w historii
-      </p>
+      {data && (
+        <p className="mb-4 text-xs text-muted">
+          Średni multi <span className="font-mono text-cream">{formatMult(data.avgMult)}</span>
+          {' · '}
+          {data.totalOpened} otwartych slotów w historii
+        </p>
+      )}
 
       <div className="mb-4 flex flex-wrap gap-2">
         {TABS.map((t) => (
@@ -184,19 +221,23 @@ export default function RankingsPanel({ hunts }) {
         ))}
       </div>
 
-      {tab === 'bestWin' && <MoneyTable groups={data.bestWin} />}
-      {tab === 'worstWin' && <MoneyTable groups={data.worstWin} />}
-      {tab === 'bestMult' && <MultTable rows={data.bestMult} />}
-      {tab === 'worstMult' && <MultTable rows={data.worstMult} />}
-      {tab === 'mostPlayed' && <MostPlayedTable rows={data.mostPlayed} />}
-      {(tab === 'hotSlots' || tab === 'coldSlots') && (
-        <>
-          <p className="mb-3 text-xs text-muted/70">
-            Na plusie = wygrana większa niż bet. Na minusie = wygrana mniejsza niż bet.
-          </p>
-          <HotColdTable rows={tab === 'hotSlots' ? data.hotSlots : data.coldSlots} />
-        </>
-      )}
+      {tab === 'bestHunts' && <HuntRankingTable rows={huntRanking} />}
+      {tab === 'bestWin' && (data ? <MoneyTable groups={data.bestWin} /> : <NoSlotsNote />)}
+      {tab === 'worstWin' && (data ? <MoneyTable groups={data.worstWin} /> : <NoSlotsNote />)}
+      {tab === 'bestMult' && (data ? <MultTable rows={data.bestMult} /> : <NoSlotsNote />)}
+      {tab === 'worstMult' && (data ? <MultTable rows={data.worstMult} /> : <NoSlotsNote />)}
+      {tab === 'mostPlayed' && (data ? <MostPlayedTable rows={data.mostPlayed} /> : <NoSlotsNote />)}
+      {(tab === 'hotSlots' || tab === 'coldSlots') &&
+        (data ? (
+          <>
+            <p className="mb-3 text-xs text-muted/70">
+              Na plusie = wygrana większa niż bet. Na minusie = wygrana mniejsza niż bet.
+            </p>
+            <HotColdTable rows={tab === 'hotSlots' ? data.hotSlots : data.coldSlots} />
+          </>
+        ) : (
+          <NoSlotsNote />
+        ))}
     </div>
   )
 }

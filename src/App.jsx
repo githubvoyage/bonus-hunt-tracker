@@ -122,6 +122,13 @@ export default function App() {
     setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
   }
 
+  // Hunt zakończony to już policzony i wysłany wynik — zmiana czegokolwiek w nim
+  // z tyłu rozjeżdża się z tym, co poszło na Discorda. Pytamy za każdym razem.
+  function guardFinished(action) {
+    if (!activeHunt?.finished) return true
+    return confirm(`Ten hunt jest już zakończony. Na pewno chcesz ${action}?`)
+  }
+
   // Pytamy tylko o nazwę. Waluta i kasa na start są edytowalne w panelu hunta.
   function handleCreateHunt(name) {
     const hunt = createHunt({ name: name.trim() })
@@ -147,11 +154,13 @@ export default function App() {
   }
 
   function handleAddEntry({ name, bet }) {
+    if (!guardFinished('dodać nowego slota')) return
     const entry = createEntry({ name, bet })
     updateActiveHunt((h) => ({ ...h, entries: [...h.entries, entry] }))
   }
 
   function handleDeleteEntry(id) {
+    if (!guardFinished('usunąć slota')) return
     updateActiveHunt((h) => ({ ...h, entries: h.entries.filter((e) => e.id !== id) }))
   }
 
@@ -179,11 +188,13 @@ export default function App() {
   }
 
   function handleAddParticipant({ name, amount, paidBy }) {
+    if (!guardFinished('dodać kogoś do ekipy')) return
     const participant = createParticipant({ name, amount, paidBy })
     updateActiveHunt((h) => ({ ...h, participants: [...(h.participants || []), participant] }))
   }
 
   function handleUpdateParticipant(id, patch) {
+    if (!guardFinished('zmienić dane w ekipie')) return
     updateActiveHunt((h) => ({
       ...h,
       participants: (h.participants || []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
@@ -191,6 +202,7 @@ export default function App() {
   }
 
   function handleRemoveParticipant(id) {
+    if (!guardFinished('usunąć kogoś z ekipy')) return
     updateActiveHunt((h) => ({
       ...h,
       participants: (h.participants || [])
@@ -267,6 +279,7 @@ export default function App() {
                   onSetName={handleSetName}
                   onSetCurrency={handleSetCurrency}
                   onSetStartBalance={handleSetStartBalance}
+                  guardEdit={guardFinished}
                 >
                   <ParticipantsPanel
                     hunt={activeHunt}
@@ -275,6 +288,7 @@ export default function App() {
                     onUpdate={handleUpdateParticipant}
                     onRemove={handleRemoveParticipant}
                     onSetStartBalance={handleSetStartBalance}
+                    guardEdit={guardFinished}
                   />
                   <EntryTable
                     entries={activeHunt.entries}
@@ -285,6 +299,7 @@ export default function App() {
                     onDelete={handleDeleteEntry}
                     onReopen={handleReopen}
                     slotNames={slotNames}
+                    guardEdit={guardFinished}
                   />
                 </SummaryBar>
 

@@ -66,7 +66,7 @@ src/
     SummaryBar.jsx         całe okno hunta w tęczowej ramce: edytowalna nazwa/waluta/kasa na start, statystyki, pasek postępu, a jako podokna podział szmalu i lista slotów
     ParticipantsPanel.jsx  „Podział szmalu”: podokno SummaryBara; domyślnie sam wynik, dodawanie i zmiany pod przyciskiem edycji
     AddEntryForm.jsx       rząd pól do dodania slota z autouzupełnianiem nazwy (datalist z knownSlotNames)
-    EditableValue.jsx      pole edytowane w miejscu (przerywana ramka, commit na Enter/blur)
+    EditableValue.jsx      pole edytowane w miejscu (przerywana ramka, commit na Enter/blur); opcjonalny `guard` na focusie pyta o potwierdzenie i odbiera focus, gdy odmówisz
     EntryTable.jsx         podokno SummaryBara: dodawanie slota na górze + tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
     RankingsPanel.jsx      zakładka Rankingi: przełączane tabelki top-10 (wygrane, multi, najczęściej grane) ze wszystkich huntów
@@ -111,6 +111,8 @@ Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentag
 - **Multi slota** = wygrana ÷ bet.
 - **Bilans wszystkich huntów** (`overallStats`) = suma kasy na start i suma wygranych ze wszystkich huntów, policzona osobno dla każdej waluty (nie sumuj € z $).
 - **Rankingi** (`computeRankings(hunts, limit=10)`) = top-N tabelki po wszystkich otwartych slotach ze wszystkich huntów, przełączane zakładkami w `RankingsPanel`: największe/najmniejsze wygrane, największy/najmniejszy multi, najczęściej grane, hot/cold sloty. Kwoty (wygrane) liczone osobno per waluta jak w `overallStats`; multi jest bezwymiarowe, więc jedna wspólna tabelka bez podziału na walutę.
+- **Najlepsze hunty** (`bestHunts`) = ranking całych huntów (nie slotów) sortowany po `overallMultiplier` — multi, nie zysk w kasie, bo zysku w € i w $ nie da się uczciwie porównać w jednej tabelce. Działa niezależnie od `computeRankings` (nie wymaga otwartych slotów, tylko `hunts.length > 0`).
+- **Ochrona zakończonego hunta**: `App.jsx` ma `guardFinished(action)` — jeśli `activeHunt.finished`, pyta `confirm()` przed każdą zmianą (dodanie/usunięcie slota, bet, wygrana, nazwa/waluta/kasa na start, ekipa). Guard siedzi w jednym miejscu na akcję: dla przycisków w samym handlerze w `App.jsx`, dla pól `EditableValue` (nazwa, waluta, kasa na start, bet) na `onFocus` przez prop `guard`, żeby pytać raz przed edycją a nie przy każdym znaku. Nowe pola/akcje na hunt też muszą przez to przejść.
 - **Hot/cold sloty** = per nazwa slota (nie per wpis) liczymy ile razy wygrana była większa od beta (na plusie) a ile razy mniejsza (na minusie); wynik = plus − minus. Hot sortuje malejąco po wyniku, cold rosnąco, remisy rozstrzyga liczba gier.
 - **Baza slotów** (`knownSlotNames`) = unikalne nazwy slotów wpisane kiedykolwiek w dowolnym huncie, posortowane od najczęściej granych — brak osobnego klucza w localStorage, liczone w locie z `hunts`. Zasila `datalist` w `AddEntryForm`.
 - **Podział dla ekipy** (`splitPayouts`):

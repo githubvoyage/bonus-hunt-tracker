@@ -5,7 +5,15 @@ const labelCls = 'text-[11px] font-bold uppercase tracking-wider text-muted'
 const inputCls =
   'rounded-lg border border-line bg-bg-deep px-3 py-2 text-cream transition-colors placeholder:text-muted/50 focus:border-cyan'
 
-export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemove, onSetStartBalance }) {
+export default function ParticipantsPanel({
+  hunt,
+  split,
+  onAdd,
+  onUpdate,
+  onRemove,
+  onSetStartBalance,
+  guardEdit,
+}) {
   // Domyślnie widać sam wynik podziału. Dodawanie ekipy i grzebanie w składzie
   // siedzi pod przyciskiem, żeby w trakcie hunta nie kradło uwagi.
   const [editing, setEditing] = useState(false)
@@ -105,7 +113,9 @@ export default function ParticipantsPanel({ hunt, split, onAdd, onUpdate, onRemo
             {formatMoney(startBalance, currency)}
           </span>
           <button
-            onClick={() => onSetStartBalance(totalIn)}
+            onClick={() => {
+              if (!guardEdit || guardEdit('zmienić kasę na start')) onSetStartBalance(totalIn)
+            }}
             className="rounded-md border border-gold px-2 py-1 font-semibold transition-colors hover:bg-gold hover:text-bg"
           >
             Ustaw kasę na {formatMoney(totalIn, currency)}

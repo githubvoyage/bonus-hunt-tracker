@@ -3,7 +3,7 @@ import { entryMultiplier, formatMoney, formatMult } from '../calc.js'
 import AddEntryForm from './AddEntryForm.jsx'
 import EditableValue from './EditableValue.jsx'
 
-function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen }) {
+function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen, guardEdit }) {
   // Edycja wygranej żyje w lokalnym stanie niezależnym od entry.opened — inaczej
   // pole zamieniałoby się w przycisk po pierwszym wpisanym znaku (bo ten od razu
   // zapisuje się wyżej i ustawia opened) i nie dałoby się dokończyć wpisywania.
@@ -20,6 +20,7 @@ function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen
   }
 
   function handleReopenClick() {
+    if (!guardEdit('poprawić wygraną')) return
     setWinInput('')
     setEditingWin(true)
     onReopen(entry.id)
@@ -50,6 +51,7 @@ function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen
           <EditableValue
             value={entry.bet}
             onCommit={(v) => onSetBet(entry.id, v)}
+            guard={() => guardEdit('zmienić bet')}
             inputMode="decimal"
             placeholder="0"
             title="Kliknij i popraw bet"
@@ -117,6 +119,7 @@ export default function EntryTable({
   onDelete,
   onReopen,
   slotNames,
+  guardEdit,
 }) {
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-line/70 bg-bg-deep/40">
@@ -157,6 +160,7 @@ export default function EntryTable({
                   onRecordWin={onRecordWin}
                   onDelete={onDelete}
                   onReopen={onReopen}
+                  guardEdit={guardEdit}
                 />
               ))}
             </tbody>
