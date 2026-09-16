@@ -20,10 +20,7 @@ export default function AddEntryForm({ onAdd }) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-wrap items-end gap-3 rounded-2xl border border-dashed border-line bg-bg-panel/60 px-5 py-4 shadow-panel"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
         <label className="text-[11px] font-bold uppercase tracking-wider text-muted">
           Nazwa slota

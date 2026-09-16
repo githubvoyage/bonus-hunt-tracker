@@ -65,8 +65,8 @@ src/
     NewHuntButton.jsx      przycisk „nowy hunt” z dymkiem na nazwę („Jak nazywamy jazdę?”)
     SummaryBar.jsx         edytowalna nazwa/waluta/kasa na start + statystyki: wygrana, zysk/strata, break-even, pasek postępu; w tej samej ramce siedzi podokno z podziałem
     ParticipantsPanel.jsx  „Podział szmalu”: podokno SummaryBara; domyślnie sam wynik, dodawanie i zmiany pod przyciskiem edycji
-    AddEntryForm.jsx       dodawanie slota
-    EntryTable.jsx         tabela slotów z wpisywaniem wygranych
+    AddEntryForm.jsx       rząd pól do dodania slota (renderowany w EntryTable, nie osobno)
+    EntryTable.jsx         jeden panel: dodawanie slota na górze + tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
 ```
 

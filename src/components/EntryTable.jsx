@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { entryMultiplier, formatMoney, formatMult } from '../calc.js'
+import AddEntryForm from './AddEntryForm.jsx'
 
 function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   const [winInput, setWinInput] = useState('')
@@ -86,46 +87,51 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   )
 }
 
-export default function EntryTable({ entries, currency, onRecordWin, onDelete, onReopen }) {
-  if (entries.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
-        <div className="mb-3 text-4xl">🎲</div>
-        <p className="font-display text-sm uppercase tracking-wider text-muted">
-          Pusto jak w portfelu
-        </p>
-        <p className="mt-2 text-sm text-muted/70">Dorzuć pierwszego slota wyżej i jedziemy.</p>
-      </div>
-    )
-  }
-
+export default function EntryTable({ entries, currency, onAdd, onRecordWin, onDelete, onReopen }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line bg-bg-panel/60 shadow-panel">
-      <table className="w-full min-w-[520px] text-sm">
-        <thead>
-          <tr className="border-b border-line bg-bg-deep/60 text-left font-display text-[10px] uppercase tracking-wider text-muted">
-            <th className="py-3 pl-3">#</th>
-            <th className="py-3 pr-3">Slot</th>
-            <th className="py-3 pr-3 text-right">Bet</th>
-            <th className="py-3 pr-3 text-right">Wygrana</th>
-            <th className="py-3 pr-3 text-right">Multi</th>
-            <th className="py-3 pr-3"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry, i) => (
-            <Row
-              key={entry.id}
-              entry={entry}
-              currency={currency}
-              index={i}
-              onRecordWin={onRecordWin}
-              onDelete={onDelete}
-              onReopen={onReopen}
-            />
-          ))}
-        </tbody>
-      </table>
+    <div className="rounded-2xl border border-line bg-bg-panel/60 shadow-panel">
+      {/* dorzucanie slota siedzi w tym samym kontenerze co lista */}
+      <div className="border-b border-line px-4 py-4 md:px-5">
+        <AddEntryForm onAdd={onAdd} />
+      </div>
+
+      {entries.length === 0 ? (
+        <div className="px-5 py-12 text-center">
+          <div className="mb-3 text-4xl">🎲</div>
+          <p className="font-display text-sm uppercase tracking-wider text-muted">
+            Pusto jak w portfelu
+          </p>
+          <p className="mt-2 text-sm text-muted/70">Dorzuć pierwszego slota wyżej i jedziemy.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px] text-sm">
+            <thead>
+              <tr className="border-b border-line bg-bg-deep/60 text-left font-display text-[10px] uppercase tracking-wider text-muted">
+                <th className="py-3 pl-3">#</th>
+                <th className="py-3 pr-3">Slot</th>
+                <th className="py-3 pr-3 text-right">Bet</th>
+                <th className="py-3 pr-3 text-right">Wygrana</th>
+                <th className="py-3 pr-3 text-right">Multi</th>
+                <th className="py-3 pr-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((entry, i) => (
+                <Row
+                  key={entry.id}
+                  entry={entry}
+                  currency={currency}
+                  index={i}
+                  onRecordWin={onRecordWin}
+                  onDelete={onDelete}
+                  onReopen={onReopen}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

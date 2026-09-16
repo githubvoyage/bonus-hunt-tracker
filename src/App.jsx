@@ -13,7 +13,6 @@ import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntButton from './components/NewHuntButton.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
-import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
 import ParticipantsPanel from './components/ParticipantsPanel.jsx'
 import WheelPanel from './components/WheelPanel.jsx'
@@ -270,10 +269,10 @@ export default function App() {
                     onSetStartBalance={handleSetStartBalance}
                   />
                 </SummaryBar>
-                <AddEntryForm onAdd={handleAddEntry} />
                 <EntryTable
                   entries={activeHunt.entries}
                   currency={activeHunt.currency}
+                  onAdd={handleAddEntry}
                   onRecordWin={handleRecordWin}
                   onDelete={handleDeleteEntry}
                   onReopen={handleReopen}
