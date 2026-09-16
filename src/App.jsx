@@ -11,7 +11,7 @@ import {
 import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
-import NewHuntPrompt from './components/NewHuntPrompt.jsx'
+import NewHuntButton from './components/NewHuntButton.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
@@ -24,7 +24,6 @@ export default function App() {
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
   const [view, setView] = useState('hunt')
-  const [askingName, setAskingName] = useState(false)
   const [cloudReady, setCloudReady] = useState(false)
   const [syncState, setSyncState] = useState('idle')
 
@@ -127,13 +126,7 @@ export default function App() {
     const hunt = createHunt({ name: name.trim() })
     setHunts((prev) => [hunt, ...prev])
     setActiveId(hunt.id)
-    setAskingName(false)
     setView('hunt')
-  }
-
-  function handleAskName() {
-    setView('hunt')
-    setAskingName(true)
   }
 
   function handleDeleteHunt(id) {
@@ -246,7 +239,7 @@ export default function App() {
           hunts={hunts}
           activeId={activeId}
           onSelect={setActiveId}
-          onNew={handleAskName}
+          onNew={handleCreateHunt}
           onDelete={handleDeleteHunt}
           onFinish={handleFinishHunt}
           sendingSummary={sendingSummary}
@@ -259,10 +252,6 @@ export default function App() {
 
         {view === 'hunt' && (
           <>
-            {askingName && (
-              <NewHuntPrompt onCreate={handleCreateHunt} onCancel={() => setAskingName(false)} />
-            )}
-
             {activeHunt && stats && (
               <>
                 <SummaryBar
@@ -292,19 +281,16 @@ export default function App() {
               </>
             )}
 
-            {!activeHunt && !askingName && (
+            {!activeHunt && (
               <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
                 <div className="mb-3 text-4xl">🎰</div>
                 <p className="font-display text-sm uppercase tracking-wider text-muted">
                   Nie ma żadnego hunta
                 </p>
                 <p className="mt-2 text-sm text-muted/70">Klikaj i lecimy.</p>
-                <button
-                  onClick={handleAskName}
-                  className="btn-jazda mt-5 rounded-lg px-6 py-2.5 font-display text-sm uppercase tracking-wider text-bg shadow-neon-pink transition-transform hover:scale-105"
-                >
-                  🚀 Napierdalamy
-                </button>
+                <div className="mt-5">
+                  <NewHuntButton onCreate={handleCreateHunt} variant="big" />
+                </div>
               </div>
             )}
           </>

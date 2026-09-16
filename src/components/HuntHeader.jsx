@@ -1,4 +1,5 @@
 import { formatMoney } from '../calc.js'
+import NewHuntButton from './NewHuntButton.jsx'
 
 export default function HuntHeader({
   hunts,
@@ -105,12 +106,7 @@ export default function HuntHeader({
               </button>
             )}
 
-            <button
-              onClick={onNew}
-              className="rounded-lg bg-gold px-4 py-2 font-display text-xs uppercase tracking-wider text-bg shadow-neon-gold transition-transform hover:scale-105 hover:bg-gold-bright"
-            >
-              + Nowy hunt
-            </button>
+            <NewHuntButton onCreate={onNew} />
 
             {activeId && (
               <button
