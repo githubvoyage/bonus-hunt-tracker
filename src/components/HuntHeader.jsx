@@ -1,3 +1,5 @@
+import { formatMoney } from '../calc.js'
+
 export default function HuntHeader({
   hunts,
   activeId,
@@ -8,18 +10,40 @@ export default function HuntHeader({
   sendingSummary,
   view,
   onChangeView,
+  overall,
 }) {
   const activeHunt = hunts.find((h) => h.id === activeId) || null
 
   return (
     <div className="space-y-4 border-b border-line pb-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-3xl blink">🎰</span>
           <h1 className="font-display text-xl leading-none text-gold neon-gold md:text-3xl">
             BONUS HUNT
             <span className="ml-2 text-pink neon-pink">TRACKER</span>
           </h1>
+
+          {overall && overall.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {overall.map((g) => (
+                <span
+                  key={g.currency}
+                  title="Bilans ze wszystkich huntów"
+                  className={`rounded-lg border px-3 py-1.5 font-mono text-sm font-bold ${
+                    g.profit > 0
+                      ? 'border-win/40 text-win neon-win'
+                      : g.profit < 0
+                      ? 'border-loss/40 text-loss neon-loss'
+                      : 'border-line text-cream'
+                  }`}
+                >
+                  💰 {g.profit >= 0 ? '+' : ''}
+                  {formatMoney(g.profit, g.currency)}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 text-sm">

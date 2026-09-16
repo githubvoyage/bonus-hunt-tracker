@@ -60,9 +60,8 @@ src/
   confetti.js              efekt konfetti na canvasie, bez zależności
   index.css                fonty, tło, neonowe efekty, animacje
   components/
-    HuntHeader.jsx         logo, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
+    HuntHeader.jsx         logo, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
     NewHuntForm.jsx        formularz nowego hunta (przycisk „Napierdalamy”)
-    OverallStatsBar.jsx    zbiorczy bilans ze wszystkich huntów, pogrupowany po walucie
     SummaryBar.jsx         statystyki: kasa na start, wygrana, zysk/strata, break-even, pasek postępu
     ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
     AddEntryForm.jsx       dodawanie slota

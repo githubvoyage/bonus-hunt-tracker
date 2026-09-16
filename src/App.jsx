@@ -4,7 +4,6 @@ import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntForm from './components/NewHuntForm.jsx'
-import OverallStatsBar from './components/OverallStatsBar.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
@@ -155,14 +154,13 @@ export default function App() {
           sendingSummary={sendingSummary}
           view={view}
           onChangeView={setView}
+          overall={overall}
         />
 
         {view === 'wheel' && <WheelPanel currency={activeHunt?.currency || '€'} />}
 
         {view === 'hunt' && (
           <>
-            <OverallStatsBar groups={overall} />
-
             {showNewForm && (
               <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
             )}
