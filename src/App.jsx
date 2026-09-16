@@ -11,7 +11,6 @@ import {
 import { huntStats, splitPayouts, overallStats } from './calc.js'
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
-import NewHuntForm from './components/NewHuntForm.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import AddEntryForm from './components/AddEntryForm.jsx'
 import EntryTable from './components/EntryTable.jsx'
@@ -21,7 +20,6 @@ import WheelPanel from './components/WheelPanel.jsx'
 export default function App() {
   const [hunts, setHunts] = useState([])
   const [activeId, setActiveId] = useState(null)
-  const [showNewForm, setShowNewForm] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const [sendingSummary, setSendingSummary] = useState(false)
   const [view, setView] = useState('hunt')
@@ -37,7 +35,6 @@ export default function App() {
     const stored = loadHunts()
     setHunts(stored)
     if (stored.length > 0) setActiveId(stored[0].id)
-    else setShowNewForm(true)
     setLoaded(true)
 
     if (!cloudEnabled) return
@@ -49,7 +46,6 @@ export default function App() {
         setHunts(merged)
         if (merged.length > 0) {
           setActiveId((cur) => (cur && merged.some((h) => h.id === cur) ? cur : merged[0].id))
-          setShowNewForm(false)
         }
         setCloudReady(true)
         setSyncState('idle')
@@ -124,11 +120,13 @@ export default function App() {
     setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
   }
 
-  function handleCreateHunt({ name, currency, startBalance }) {
-    const hunt = createHunt({ name, currency, startBalance })
+  // Klik = gotowy hunt. Nazwę, walutę i kasę na start zmienia się potem na
+  // miejscu, w panelu hunta.
+  function handleCreateHunt() {
+    const hunt = createHunt({})
     setHunts((prev) => [hunt, ...prev])
     setActiveId(hunt.id)
-    setShowNewForm(false)
+    setView('hunt')
   }
 
   function handleDeleteHunt(id) {
@@ -136,11 +134,7 @@ export default function App() {
     const doomed = hunts.find((h) => h.id === id) || { id }
     setHunts((prev) => {
       const next = prev.filter((h) => h.id !== id)
-      if (next.length > 0) setActiveId(next[0].id)
-      else {
-        setActiveId(null)
-        setShowNewForm(true)
-      }
+      setActiveId(next.length > 0 ? next[0].id : null)
       return next
     })
     if (cloudReady) {
@@ -197,6 +191,14 @@ export default function App() {
     }))
   }
 
+  function handleSetName(value) {
+    updateActiveHunt((h) => ({ ...h, name: value.trim() || 'Hunt bez nazwy' }))
+  }
+
+  function handleSetCurrency(value) {
+    updateActiveHunt((h) => ({ ...h, currency: value.trim() || '€' }))
+  }
+
   function handleSetStartBalance(value) {
     updateActiveHunt((h) => ({ ...h, startBalance: Number(value) || 0 }))
   }
@@ -237,7 +239,7 @@ export default function App() {
           hunts={hunts}
           activeId={activeId}
           onSelect={setActiveId}
-          onNew={() => setShowNewForm(true)}
+          onNew={handleCreateHunt}
           onDelete={handleDeleteHunt}
           onFinish={handleFinishHunt}
           sendingSummary={sendingSummary}
@@ -250,13 +252,15 @@ export default function App() {
 
         {view === 'hunt' && (
           <>
-            {showNewForm && (
-              <NewHuntForm onCreate={handleCreateHunt} onCancel={() => setShowNewForm(false)} />
-            )}
-
             {activeHunt && stats && (
               <>
-                <SummaryBar hunt={activeHunt} stats={stats} />
+                <SummaryBar
+                  hunt={activeHunt}
+                  stats={stats}
+                  onSetName={handleSetName}
+                  onSetCurrency={handleSetCurrency}
+                  onSetStartBalance={handleSetStartBalance}
+                />
                 <ParticipantsPanel
                   hunt={activeHunt}
                   split={split}
@@ -276,13 +280,19 @@ export default function App() {
               </>
             )}
 
-            {!activeHunt && !showNewForm && (
+            {!activeHunt && (
               <div className="rounded-2xl border border-dashed border-line bg-bg-panel/40 px-5 py-14 text-center">
                 <div className="mb-3 text-4xl">🎰</div>
                 <p className="font-display text-sm uppercase tracking-wider text-muted">
                   Nie ma żadnego hunta
                 </p>
-                <p className="mt-2 text-sm text-muted/70">Odpal nowy i lecimy.</p>
+                <p className="mt-2 text-sm text-muted/70">Klikaj i lecimy.</p>
+                <button
+                  onClick={handleCreateHunt}
+                  className="btn-jazda mt-5 rounded-lg px-6 py-2.5 font-display text-sm uppercase tracking-wider text-bg shadow-neon-pink transition-transform hover:scale-105"
+                >
+                  🚀 Napierdalamy
+                </button>
               </div>
             )}
           </>

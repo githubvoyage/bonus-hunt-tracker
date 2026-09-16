@@ -62,8 +62,7 @@ src/
   index.css                fonty, tło, neonowe efekty, animacje
   components/
     HuntHeader.jsx         logo, bilans ze wszystkich huntów, zakładki Hunt/Koło zrzutki, wybór hunta, zakończenie hunta (webhook Discord), nowy/usuń hunt
-    NewHuntForm.jsx        formularz nowego hunta (przycisk „Napierdalamy”)
-    SummaryBar.jsx         statystyki: kasa na start, wygrana, zysk/strata, break-even, pasek postępu
+    SummaryBar.jsx         edytowalna nazwa/waluta/kasa na start + statystyki: wygrana, zysk/strata, break-even, pasek postępu
     ParticipantsPanel.jsx  ekipa: kto ile włożył, kto wpłacił, ile komu się należy
     AddEntryForm.jsx       dodawanie slota
     EntryTable.jsx         tabela slotów z wpisywaniem wygranych
@@ -166,4 +165,4 @@ Dwie pułapki, na które już się nadzialiśmy:
 
 - Nie ma export/import JSON, więc jedyny backup poza przeglądarką to Supabase.
 - „Do zera trzeba” pokazuje `—`, gdy hunt jest już na plusie. Lepiej byłoby wyświetlić np. „✅ Już odrobione”.
-- Nie ma edycji kasy na start ani nazwy hunta po utworzeniu. Kasę da się tylko zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.
+- Nowy hunt powstaje od razu po kliknięciu, bez formularza. Nazwę, walutę i kasę na start zmienia się potem w panelu hunta, klikając w wartość. Kasę da się też zsynchronizować z sumą wkładów przyciskiem w panelu ekipy.

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { formatMoney, formatMult } from '../calc.js'
 
 function Stat({ label, value, tone, big }) {
@@ -20,7 +21,37 @@ function Stat({ label, value, tone, big }) {
   )
 }
 
-export default function SummaryBar({ hunt, stats }) {
+/**
+ * Pole, które wygląda jak reszta statystyk, dopóki się w nie nie kliknie.
+ * Trzyma własny tekst, żeby dało się wpisać „12.” w drodze do „12.50”,
+ * i oddaje wartość dopiero przy wyjściu z pola albo Enterze.
+ */
+function EditableValue({ value, onCommit, className, ...rest }) {
+  const [draft, setDraft] = useState(String(value ?? ''))
+
+  useEffect(() => {
+    setDraft(String(value ?? ''))
+  }, [value])
+
+  function commit() {
+    onCommit(draft)
+  }
+
+  return (
+    <input
+      {...rest}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur()
+      }}
+      className={`rounded-lg border border-transparent bg-transparent px-2 py-0.5 outline-none transition-colors hover:border-line focus:border-gold focus:bg-bg-deep ${className}`}
+    />
+  )
+}
+
+export default function SummaryBar({ hunt, stats, onSetName, onSetCurrency, onSetStartBalance }) {
   const profitTone = stats.profit > 0 ? 'win' : stats.profit < 0 ? 'loss' : null
   const allOpened = stats.unopenedCount === 0 && stats.count > 0
   const progress = stats.count > 0 ? (stats.openedCount / stats.count) * 100 : 0
@@ -31,8 +62,44 @@ export default function SummaryBar({ hunt, stats }) {
         stats.profit > 0 && allOpened ? 'pulse-glow' : ''
       }`}
     >
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <EditableValue
+          value={hunt.name}
+          onCommit={(v) => onSetName(v)}
+          placeholder="Jebanka po wypłacie"
+          title="Kliknij i zmień nazwę hunta"
+          className="min-w-0 flex-1 font-display text-base uppercase tracking-wider text-gold neon-gold placeholder:text-muted/50 md:text-lg"
+        />
+        <div className="flex flex-col gap-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Waluta</span>
+          <EditableValue
+            value={hunt.currency}
+            onCommit={(v) => onSetCurrency(v)}
+            title="Kliknij i zmień walutę"
+            className="w-14 text-center font-mono text-cream"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-5 md:grid-cols-4">
-        <Stat label="Kasa na start" value={formatMoney(hunt.startBalance, hunt.currency)} />
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
+            Kasa na start
+          </span>
+          <div className="flex items-baseline gap-1">
+            <span className="font-mono text-xl font-bold text-muted md:text-2xl">
+              {hunt.currency}
+            </span>
+            <EditableValue
+              value={hunt.startBalance}
+              onCommit={(v) => onSetStartBalance(v)}
+              inputMode="decimal"
+              placeholder="0"
+              title="Kliknij i wpisz, ile poszło na start"
+              className="w-full min-w-0 font-mono text-xl font-bold text-cream md:text-2xl"
+            />
+          </div>
+        </div>
         <Stat label="Wygrana" value={formatMoney(stats.totalWin, hunt.currency)} tone="gold" />
         <Stat
           label="Zysk / strata"
