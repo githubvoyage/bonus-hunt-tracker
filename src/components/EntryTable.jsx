@@ -20,10 +20,11 @@ function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen
   }
 
   function handleReopenClick() {
-    if (!guardEdit('poprawić wygraną')) return
-    setWinInput('')
-    setEditingWin(true)
-    onReopen(entry.id)
+    guardEdit('poprawić wygraną', () => {
+      setWinInput('')
+      setEditingWin(true)
+      onReopen(entry.id)
+    })
   }
 
   return (
@@ -51,7 +52,7 @@ function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen
           <EditableValue
             value={entry.bet}
             onCommit={(v) => onSetBet(entry.id, v)}
-            guard={() => guardEdit('zmienić bet')}
+            guard={(onYes, onNo) => guardEdit('zmienić bet', onYes, onNo)}
             inputMode="decimal"
             placeholder="0"
             title="Kliknij i popraw bet"

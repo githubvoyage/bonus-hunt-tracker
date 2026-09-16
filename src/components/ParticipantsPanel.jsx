@@ -114,7 +114,8 @@ export default function ParticipantsPanel({
           </span>
           <button
             onClick={() => {
-              if (!guardEdit || guardEdit('zmienić kasę na start')) onSetStartBalance(totalIn)
+              if (guardEdit) guardEdit('zmienić kasę na start', () => onSetStartBalance(totalIn))
+              else onSetStartBalance(totalIn)
             }}
             className="rounded-md border border-gold px-2 py-1 font-semibold transition-colors hover:bg-gold hover:text-bg"
           >

@@ -5,6 +5,12 @@ import { useEffect, useState } from 'react'
  * Trzyma własny tekst, żeby dało się wpisać „12.” w drodze do „12.50”,
  * i oddaje wartość dopiero przy wyjściu z pola albo Enterze.
  * Przerywana ramka jest sygnałem, że to się klika i zmienia.
+ *
+ * `guard`, jeśli podany, to `(onYes, onNo) => void` — wywoływany na blur, tylko
+ * gdy wartość faktycznie się zmieniła. Dostaje dwa callbacki zamiast zwracać
+ * bool, bo potwierdzenie leci przez własny modal (a nie window.confirm(),
+ * które potrafi się zapętlić na focusie i nie działa we wszystkich
+ * przeglądarkach w aplikacjach) — modal odpowiada asynchronicznie.
  */
 export default function EditableValue({ value, onCommit, guard, className, ...rest }) {
   const [draft, setDraft] = useState(String(value ?? ''))
@@ -17,13 +23,11 @@ export default function EditableValue({ value, onCommit, guard, className, ...re
     const original = String(value ?? '')
     if (draft === original) return // nic się nie zmieniło, nie ma o co pytać
 
-    // guard() pyta „na pewno?", gdy edycja wymaga potwierdzenia (np. hunt już
-    // zakończony). Robimy to na blur, a nie na focus — confirm() na focusie
-    // wywołuje w przeglądarkach pętlę: dialog zabiera focus, po zamknięciu
-    // przeglądarka oddaje focus z powrotem na to samo pole, co odpala focus
-    // (i confirm()) jeszcze raz w nieskończoność.
-    if (guard && !guard()) {
-      setDraft(original) // cofnij wpisaną zmianę
+    if (guard) {
+      guard(
+        () => onCommit(draft),
+        () => setDraft(original) // cofnij wpisaną zmianę
+      )
       return
     }
     onCommit(draft)

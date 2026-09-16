@@ -12,6 +12,7 @@ import { huntStats, splitPayouts, overallStats, knownSlotNames } from './calc.js
 import { sendHuntSummary } from './discord.js'
 import HuntHeader from './components/HuntHeader.jsx'
 import NewHuntButton from './components/NewHuntButton.jsx'
+import ConfirmModal from './components/ConfirmModal.jsx'
 import SummaryBar from './components/SummaryBar.jsx'
 import EntryTable from './components/EntryTable.jsx'
 import ParticipantsPanel from './components/ParticipantsPanel.jsx'
@@ -26,6 +27,7 @@ export default function App() {
   const [view, setView] = useState('hunt')
   const [cloudReady, setCloudReady] = useState(false)
   const [syncState, setSyncState] = useState('idle')
+  const [confirmState, setConfirmState] = useState(null)
 
   // Efekty synchronizacji czytają stan przez ref, żeby nie restartować się
   // przy każdej zmianie huntów.
@@ -122,11 +124,26 @@ export default function App() {
     setHunts((prev) => prev.map((h) => (h.id === activeId ? mutate(h) : h)))
   }
 
+  // Własny modal zamiast window.confirm(): natywne okienko potrafi się zapętlić
+  // (przeglądarka oddaje focus z powrotem po zamknięciu, co odpala focus jeszcze
+  // raz) albo w ogóle nie działać w niektórych przeglądarkach w aplikacjach
+  // (Messenger, Instagram itp.) — więc pytamy własnym komponentem.
+  function askConfirm(message, onConfirm, onCancel) {
+    setConfirmState({ message, onConfirm, onCancel: onCancel || (() => {}) })
+  }
+
+  function closeConfirm() {
+    setConfirmState(null)
+  }
+
   // Hunt zakończony to już policzony i wysłany wynik — zmiana czegokolwiek w nim
   // z tyłu rozjeżdża się z tym, co poszło na Discorda. Pytamy za każdym razem.
-  function guardFinished(action) {
-    if (!activeHunt?.finished) return true
-    return confirm(`Ten hunt jest już zakończony. Na pewno chcesz ${action}?`)
+  function guardFinished(action, onConfirm, onCancel) {
+    if (!activeHunt?.finished) {
+      onConfirm()
+      return
+    }
+    askConfirm(`Ten hunt jest już zakończony. Na pewno chcesz ${action}?`, onConfirm, onCancel)
   }
 
   // Pytamy tylko o nazwę. Waluta i kasa na start są edytowalne w panelu hunta.
@@ -138,30 +155,33 @@ export default function App() {
   }
 
   function handleDeleteHunt(id) {
-    if (!confirm('Usunąć tego hunta? Zniknie całej ekipie.')) return
-    const doomed = hunts.find((h) => h.id === id) || { id }
-    setHunts((prev) => {
-      const next = prev.filter((h) => h.id !== id)
-      setActiveId(next.length > 0 ? next[0].id : null)
-      return next
-    })
-    if (cloudReady) {
-      pushDelete(doomed).catch((e) => {
-        console.error('Nie udało się skasować hunta w chmurze', e)
-        setSyncState('error')
+    askConfirm('Usunąć tego hunta? Zniknie całej ekipie.', () => {
+      const doomed = hunts.find((h) => h.id === id) || { id }
+      setHunts((prev) => {
+        const next = prev.filter((h) => h.id !== id)
+        setActiveId(next.length > 0 ? next[0].id : null)
+        return next
       })
-    }
+      if (cloudReady) {
+        pushDelete(doomed).catch((e) => {
+          console.error('Nie udało się skasować hunta w chmurze', e)
+          setSyncState('error')
+        })
+      }
+    })
   }
 
   function handleAddEntry({ name, bet }) {
-    if (!guardFinished('dodać nowego slota')) return
-    const entry = createEntry({ name, bet })
-    updateActiveHunt((h) => ({ ...h, entries: [...h.entries, entry] }))
+    guardFinished('dodać nowego slota', () => {
+      const entry = createEntry({ name, bet })
+      updateActiveHunt((h) => ({ ...h, entries: [...h.entries, entry] }))
+    })
   }
 
   function handleDeleteEntry(id) {
-    if (!guardFinished('usunąć slota')) return
-    updateActiveHunt((h) => ({ ...h, entries: h.entries.filter((e) => e.id !== id) }))
+    guardFinished('usunąć slota', () => {
+      updateActiveHunt((h) => ({ ...h, entries: h.entries.filter((e) => e.id !== id) }))
+    })
   }
 
   function handleSetBet(id, betValue) {
@@ -188,27 +208,30 @@ export default function App() {
   }
 
   function handleAddParticipant({ name, amount, paidBy }) {
-    if (!guardFinished('dodać kogoś do ekipy')) return
-    const participant = createParticipant({ name, amount, paidBy })
-    updateActiveHunt((h) => ({ ...h, participants: [...(h.participants || []), participant] }))
+    guardFinished('dodać kogoś do ekipy', () => {
+      const participant = createParticipant({ name, amount, paidBy })
+      updateActiveHunt((h) => ({ ...h, participants: [...(h.participants || []), participant] }))
+    })
   }
 
   function handleUpdateParticipant(id, patch) {
-    if (!guardFinished('zmienić dane w ekipie')) return
-    updateActiveHunt((h) => ({
-      ...h,
-      participants: (h.participants || []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
-    }))
+    guardFinished('zmienić dane w ekipie', () => {
+      updateActiveHunt((h) => ({
+        ...h,
+        participants: (h.participants || []).map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      }))
+    })
   }
 
   function handleRemoveParticipant(id) {
-    if (!guardFinished('usunąć kogoś z ekipy')) return
-    updateActiveHunt((h) => ({
-      ...h,
-      participants: (h.participants || [])
-        .filter((p) => p.id !== id)
-        .map((p) => (p.paidBy === id ? { ...p, paidBy: null } : p)),
-    }))
+    guardFinished('usunąć kogoś z ekipy', () => {
+      updateActiveHunt((h) => ({
+        ...h,
+        participants: (h.participants || [])
+          .filter((p) => p.id !== id)
+          .map((p) => (p.paidBy === id ? { ...p, paidBy: null } : p)),
+      }))
+    })
   }
 
   function handleSetName(value) {
@@ -223,31 +246,29 @@ export default function App() {
     updateActiveHunt((h) => ({ ...h, startBalance: Number(value) || 0 }))
   }
 
-  async function handleFinishHunt() {
+  function handleFinishHunt() {
     if (!activeHunt || !stats) return
     const already = Boolean(activeHunt.finished)
-    if (
-      !confirm(
-        already
-          ? 'Wysłać podsumowanie tego hunta na Discorda jeszcze raz?'
-          : 'Zakończyć hunta i wysłać podsumowanie na Discorda?'
-      )
+    askConfirm(
+      already
+        ? 'Wysłać podsumowanie tego hunta na Discorda jeszcze raz?'
+        : 'Zakończyć hunta i wysłać podsumowanie na Discorda?',
+      async () => {
+        const huntId = activeHunt.id
+        setSendingSummary(true)
+        try {
+          await sendHuntSummary(activeHunt, stats)
+          setHunts((prev) =>
+            prev.map((h) => (h.id === huntId ? { ...h, finished: true, finishedAt: Date.now() } : h))
+          )
+        } catch (e) {
+          console.error(e)
+          alert('Nie udało się wysłać podsumowania na Discorda. Sprawdź połączenie i spróbuj ponownie.')
+        } finally {
+          setSendingSummary(false)
+        }
+      }
     )
-      return
-
-    const huntId = activeHunt.id
-    setSendingSummary(true)
-    try {
-      await sendHuntSummary(activeHunt, stats)
-      setHunts((prev) =>
-        prev.map((h) => (h.id === huntId ? { ...h, finished: true, finishedAt: Date.now() } : h))
-      )
-    } catch (e) {
-      console.error(e)
-      alert('Nie udało się wysłać podsumowania na Discorda. Sprawdź połączenie i spróbuj ponownie.')
-    } finally {
-      setSendingSummary(false)
-    }
   }
 
   if (!loaded) return null
@@ -358,6 +379,22 @@ export default function App() {
           )}
         </footer>
       </div>
+
+      {confirmState && (
+        <ConfirmModal
+          message={confirmState.message}
+          onConfirm={() => {
+            const { onConfirm } = confirmState
+            closeConfirm()
+            onConfirm()
+          }}
+          onCancel={() => {
+            const { onCancel } = confirmState
+            closeConfirm()
+            onCancel()
+          }}
+        />
+      )}
     </div>
   )
 }
