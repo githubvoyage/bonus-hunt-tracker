@@ -1,39 +1,124 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { computeRankings, formatMoney, formatMult } from '../calc.js'
 
-const TONE_CLASS = {
-  gold: 'text-gold neon-gold',
-  pink: 'text-pink neon-pink',
-  cyan: 'text-cyan',
-  violet: 'text-violet',
-  win: 'text-win neon-win',
-  loss: 'text-loss neon-loss',
+const TABS = [
+  { key: 'bestWin', label: 'Największe wygrane', icon: '🏆' },
+  { key: 'worstWin', label: 'Najmniejsze wygrane', icon: '💀' },
+  { key: 'bestMult', label: 'Największy multi', icon: '🚀' },
+  { key: 'worstMult', label: 'Najmniejszy multi', icon: '🧊' },
+  { key: 'mostPlayed', label: 'Najczęściej grane', icon: '🎡' },
+]
+
+const thCls = 'py-2 pr-3 text-left'
+const tdName = 'py-2 pr-3 font-semibold text-cream'
+const tdMuted = 'py-2 pr-3 text-xs text-muted'
+const tdRight = 'py-2 pr-3 text-right font-mono text-cream'
+
+function multClass(mult) {
+  if (mult === null) return 'text-muted'
+  if (mult >= 50) return 'text-pink neon-pink'
+  if (mult >= 10) return 'text-gold neon-gold'
+  return 'text-cream'
 }
 
-function RankCard({ icon, label, value, detail, tone }) {
+function Table({ children }) {
   return (
-    <div className="rounded-xl border border-line bg-bg-deep/60 px-4 py-3">
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted">
-        <span>{icon}</span>
-        <span>{label}</span>
-      </div>
-      <div
-        className={`mt-1.5 truncate font-mono text-xl font-bold ${TONE_CLASS[tone] || 'text-cream'}`}
-        title={value}
-      >
-        {value}
-      </div>
-      {detail && (
-        <div className="mt-1 truncate text-xs text-muted/80" title={detail}>
-          {detail}
-        </div>
-      )}
+    <div className="overflow-x-auto rounded-xl border border-line/70">
+      <table className="w-full min-w-[520px] text-sm">{children}</table>
     </div>
   )
 }
 
+function Thead({ columns }) {
+  return (
+    <thead>
+      <tr className="border-b border-line bg-bg-deep/60 font-display text-[10px] uppercase tracking-wider text-muted">
+        <th className={`${thCls} pl-3`}>#</th>
+        {columns.map((c) => (
+          <th key={c} className={thCls}>
+            {c}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  )
+}
+
+function MoneyTable({ groups }) {
+  return (
+    <div className="space-y-4">
+      {groups.map((g) => (
+        <div key={g.currency}>
+          {groups.length > 1 && (
+            <div className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted">
+              Waluta {g.currency}
+            </div>
+          )}
+          <Table>
+            <Thead columns={['Slot', 'Hunt', 'Bet', 'Wygrana', 'Multi']} />
+            <tbody>
+              {g.rows.map((r, i) => (
+                <tr key={i} className="border-b border-line/50">
+                  <td className="py-2 pl-3 font-mono text-xs text-muted">{i + 1}</td>
+                  <td className={tdName}>{r.name}</td>
+                  <td className={tdMuted}>{r.huntName}</td>
+                  <td className={tdRight}>{formatMoney(r.bet, g.currency)}</td>
+                  <td className={`${tdRight} font-bold text-gold`}>{formatMoney(r.win, g.currency)}</td>
+                  <td className={`${tdRight} font-bold ${multClass(r.multiplier)}`}>
+                    {formatMult(r.multiplier)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function MultTable({ rows }) {
+  return (
+    <Table>
+      <Thead columns={['Slot', 'Hunt', 'Bet', 'Wygrana', 'Multi']} />
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={i} className="border-b border-line/50">
+            <td className="py-2 pl-3 font-mono text-xs text-muted">{i + 1}</td>
+            <td className={tdName}>{r.name}</td>
+            <td className={tdMuted}>{r.huntName}</td>
+            <td className={tdRight}>{formatMoney(r.bet, r.currency)}</td>
+            <td className={`${tdRight} font-bold text-gold`}>{formatMoney(r.win, r.currency)}</td>
+            <td className={`${tdRight} font-bold ${multClass(r.multiplier)}`}>
+              {formatMult(r.multiplier)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+
+function MostPlayedTable({ rows }) {
+  return (
+    <Table>
+      <Thead columns={['Slot', 'Ile razy']} />
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={r.name} className="border-b border-line/50">
+            <td className="py-2 pl-3 font-mono text-xs text-muted">{i + 1}</td>
+            <td className={tdName}>{r.name}</td>
+            <td className={`${tdRight} font-bold text-violet`}>{r.count}×</td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  )
+}
+
 export default function RankingsPanel({ hunts }) {
-  const data = useMemo(() => computeRankings(hunts), [hunts])
+  const data = useMemo(() => computeRankings(hunts, 10), [hunts])
+  const [tab, setTab] = useState('bestWin')
 
   if (!data) {
     return (
@@ -49,78 +134,40 @@ export default function RankingsPanel({ hunts }) {
 
   return (
     <div className="gradient-frame rounded-2xl px-5 py-5 shadow-panel md:px-6">
-      <div className="mb-5 flex items-center gap-2">
+      <div className="mb-1 flex flex-wrap items-center gap-2">
         <span className="text-xl">🏆</span>
         <h2 className="font-display text-sm uppercase tracking-wider text-gold neon-gold">
           Rankingi
         </h2>
         <span className="text-xs text-muted">ze wszystkich huntów razem</span>
       </div>
+      <p className="mb-4 text-xs text-muted">
+        Średni multi <span className="font-mono text-cream">{formatMult(data.avgMult)}</span>
+        {' · '}
+        {data.totalOpened} otwartych slotów w historii
+      </p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {data.bestMult && (
-          <RankCard
-            icon="🚀"
-            label="Największy multi"
-            tone="pink"
-            value={formatMult(data.bestMult.multiplier)}
-            detail={`${data.bestMult.name} · ${data.bestMult.huntName}`}
-          />
-        )}
-        {data.worstMult && (
-          <RankCard
-            icon="🧊"
-            label="Najmniejszy multi"
-            tone="loss"
-            value={formatMult(data.worstMult.multiplier)}
-            detail={`${data.worstMult.name} · ${data.worstMult.huntName}`}
-          />
-        )}
-        <RankCard
-          icon="📊"
-          label="Średni multi"
-          tone="cyan"
-          value={formatMult(data.avgMult)}
-          detail={`z ${data.totalOpened} otwartych slotów`}
-        />
-        {data.mostPlayed && (
-          <RankCard
-            icon="🎡"
-            label="Najczęściej grany"
-            tone="violet"
-            value={data.mostPlayed.name}
-            detail={`${data.mostPlayed.count}× w historii`}
-          />
-        )}
-      </div>
-
-      <div className="mt-4 space-y-4">
-        {data.moneyRankings.map((g) => (
-          <div key={g.currency} className="grid gap-4 sm:grid-cols-3">
-            <RankCard
-              icon="🏆"
-              label={`Najlepsza wygrana (${g.currency})`}
-              tone="win"
-              value={formatMoney(g.best.win, g.currency)}
-              detail={`${g.best.name} · ${g.best.huntName}`}
-            />
-            <RankCard
-              icon="💀"
-              label={`Najgorsza wygrana (${g.currency})`}
-              tone="loss"
-              value={formatMoney(g.worst.win, g.currency)}
-              detail={`${g.worst.name} · ${g.worst.huntName}`}
-            />
-            <RankCard
-              icon="💰"
-              label={`Suma wygranych (${g.currency})`}
-              tone="gold"
-              value={formatMoney(g.totalWin, g.currency)}
-              detail={`${g.count} otwartych slotów`}
-            />
-          </div>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`rounded-lg border px-3 py-1.5 font-display text-[11px] uppercase tracking-wider transition-all ${
+              tab === t.key
+                ? 'border-gold text-gold shadow-neon-gold'
+                : 'border-line text-muted hover:border-gold hover:text-gold'
+            }`}
+          >
+            {t.icon} {t.label}
+          </button>
         ))}
       </div>
+
+      {tab === 'bestWin' && <MoneyTable groups={data.bestWin} />}
+      {tab === 'worstWin' && <MoneyTable groups={data.worstWin} />}
+      {tab === 'bestMult' && <MultTable rows={data.bestMult} />}
+      {tab === 'worstMult' && <MultTable rows={data.worstMult} />}
+      {tab === 'mostPlayed' && <MostPlayedTable rows={data.mostPlayed} />}
     </div>
   )
 }

@@ -61,9 +61,10 @@ export function knownSlotNames(hunts = []) {
     .map(([name]) => name)
 }
 
-// rankingi ze wszystkich otwartych slotów ze wszystkich huntów; kwoty liczone
-// osobno per waluta, multi jest bezwymiarowe więc liczone wspólnie
-export function computeRankings(hunts = []) {
+// rankingi top-N ze wszystkich otwartych slotów ze wszystkich huntów. Kwoty
+// (wygrane) liczone osobno per waluta, żeby nie mieszać € z $ w jednej tabelce;
+// multi jest bezwymiarowe, więc leci jedna wspólna tabelka bez podziału.
+export function computeRankings(hunts = [], limit = 10) {
   const opened = []
   for (const hunt of hunts) {
     const currency = hunt.currency || '€'
@@ -82,46 +83,41 @@ export function computeRankings(hunts = []) {
 
   if (opened.length === 0) return null
 
-  const byCurrency = new Map()
-  for (const e of opened) {
-    const g = byCurrency.get(e.currency) || { currency: e.currency, entries: [] }
-    g.entries.push(e)
-    byCurrency.set(e.currency, g)
-  }
-  const moneyRankings = Array.from(byCurrency.values()).map((g) => {
-    const sorted = [...g.entries].sort((a, b) => b.win - a.win)
-    return {
-      currency: g.currency,
-      best: sorted[0],
-      worst: sorted[sorted.length - 1],
-      totalWin: g.entries.reduce((s, e) => s + e.win, 0),
-      count: g.entries.length,
-    }
-  })
+  const currencies = Array.from(new Set(opened.map((e) => e.currency)))
+  const topByCurrency = (sortFn) =>
+    currencies
+      .map((currency) => ({
+        currency,
+        rows: opened
+          .filter((e) => e.currency === currency)
+          .sort(sortFn)
+          .slice(0, limit),
+      }))
+      .filter((g) => g.rows.length > 0)
 
   const withMult = opened.filter((e) => e.multiplier !== null)
-  const bestMult = withMult.length
-    ? withMult.reduce((a, b) => (b.multiplier > a.multiplier ? b : a))
-    : null
-  const worstMult = withMult.length
-    ? withMult.reduce((a, b) => (b.multiplier < a.multiplier ? b : a))
-    : null
   const avgMult = withMult.length
     ? withMult.reduce((s, e) => s + e.multiplier, 0) / withMult.length
     : 0
 
   const nameCounts = new Map()
-  for (const e of opened) nameCounts.set(e.name, (nameCounts.get(e.name) || 0) + 1)
-  const [mostPlayedName, mostPlayedCount] =
-    Array.from(nameCounts.entries()).sort((a, b) => b[1] - a[1])[0] || []
+  for (const e of opened) {
+    const g = nameCounts.get(e.name) || { name: e.name, count: 0 }
+    g.count += 1
+    nameCounts.set(e.name, g)
+  }
+  const mostPlayed = Array.from(nameCounts.values())
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .slice(0, limit)
 
   return {
     totalOpened: opened.length,
-    moneyRankings,
-    bestMult,
-    worstMult,
     avgMult,
-    mostPlayed: mostPlayedName ? { name: mostPlayedName, count: mostPlayedCount } : null,
+    bestWin: topByCurrency((a, b) => b.win - a.win),
+    worstWin: topByCurrency((a, b) => a.win - b.win),
+    bestMult: [...withMult].sort((a, b) => b.multiplier - a.multiplier).slice(0, limit),
+    worstMult: [...withMult].sort((a, b) => a.multiplier - b.multiplier).slice(0, limit),
+    mostPlayed,
   }
 }
 

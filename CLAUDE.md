@@ -69,7 +69,7 @@ src/
     EditableValue.jsx      pole edytowane w miejscu (przerywana ramka, commit na Enter/blur)
     EntryTable.jsx         podokno SummaryBara: dodawanie slota na górze + tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
-    RankingsPanel.jsx      zakładka Rankingi: najlepszy/najgorszy slot, największy/najmniejszy multi itd. ze wszystkich huntów
+    RankingsPanel.jsx      zakładka Rankingi: przełączane tabelki top-10 (wygrane, multi, najczęściej grane) ze wszystkich huntów
 ```
 
 Logika liczenia ma zostać w `calc.js` jako czyste funkcje, a komponenty tylko wyświetlają wyniki.
@@ -110,7 +110,7 @@ Procent szansy to `weight / suma(weight) * 100`, liczony w locie (`withPercentag
 - **Do zera trzeba (break-even)** = (kasa na start − suma wygranych) ÷ suma betów nieotwartych slotów. Gdy jesteś już na plusie, wynik to `null` i wyświetla się `—`.
 - **Multi slota** = wygrana ÷ bet.
 - **Bilans wszystkich huntów** (`overallStats`) = suma kasy na start i suma wygranych ze wszystkich huntów, policzona osobno dla każdej waluty (nie sumuj € z $).
-- **Rankingi** (`computeRankings`) = statystyki po wszystkich otwartych slotach ze wszystkich huntów. Kwoty (najlepsza/najgorsza wygrana, suma) liczone osobno per waluta jak w `overallStats`; multi (największy/najmniejszy/średni) jest bezwymiarowe, więc liczone wspólnie bez podziału na walutę.
+- **Rankingi** (`computeRankings(hunts, limit=10)`) = top-N tabelki po wszystkich otwartych slotach ze wszystkich huntów, przełączane zakładkami w `RankingsPanel`: największe/najmniejsze wygrane, największy/najmniejszy multi, najczęściej grane. Kwoty (wygrane) liczone osobno per waluta jak w `overallStats`; multi jest bezwymiarowe, więc jedna wspólna tabelka bez podziału na walutę.
 - **Baza slotów** (`knownSlotNames`) = unikalne nazwy slotów wpisane kiedykolwiek w dowolnym huncie, posortowane od najczęściej granych — brak osobnego klucza w localStorage, liczone w locie z `hunts`. Zasila `datalist` w `AddEntryForm`.
 - **Podział dla ekipy** (`splitPayouts`):
   - udział = wkład osoby ÷ suma wkładów,

@@ -4,16 +4,25 @@ import AddEntryForm from './AddEntryForm.jsx'
 import EditableValue from './EditableValue.jsx'
 
 function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen }) {
-  const [winInput, setWinInput] = useState('')
+  // Edycja wygranej żyje w lokalnym stanie niezależnym od entry.opened — inaczej
+  // pole zamieniałoby się w przycisk po pierwszym wpisanym znaku (bo ten od razu
+  // zapisuje się wyżej i ustawia opened) i nie dałoby się dokończyć wpisywania.
+  const [winInput, setWinInput] = useState(entry.opened ? String(entry.win ?? '') : '')
+  const [editingWin, setEditingWin] = useState(!entry.opened)
   const mult = entryMultiplier(entry)
   const mega = mult !== null && mult >= 50
   const banger = mult !== null && mult >= 10 && !mega
 
-  function submitWin(e) {
-    e.preventDefault()
-    if (winInput === '') return
-    onRecordWin(entry.id, winInput)
+  function handleWinChange(e) {
+    const v = e.target.value
+    setWinInput(v)
+    if (v !== '') onRecordWin(entry.id, v)
+  }
+
+  function handleReopenClick() {
     setWinInput('')
+    setEditingWin(true)
+    onReopen(entry.id)
   }
 
   return (
@@ -50,24 +59,25 @@ function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen
       </td>
 
       <td className="py-3 pr-3 text-right font-mono">
-        {entry.opened ? (
+        {editingWin ? (
+          <input
+            autoFocus
+            value={winInput}
+            onChange={handleWinChange}
+            onBlur={() => setEditingWin(false)}
+            onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+            inputMode="decimal"
+            placeholder="wygrana"
+            className="w-24 rounded-lg border border-line bg-bg-deep px-2 py-1.5 text-right font-mono text-cream transition-colors placeholder:text-muted/40 focus:border-win"
+          />
+        ) : (
           <button
-            onClick={() => onReopen(entry.id)}
+            onClick={handleReopenClick}
             className="font-semibold text-cream underline decoration-dotted underline-offset-4 transition-colors hover:text-gold"
             title="Kliknij, żeby poprawić"
           >
             {formatMoney(entry.win, currency)}
           </button>
-        ) : (
-          <form onSubmit={submitWin} className="flex justify-end">
-            <input
-              value={winInput}
-              onChange={(e) => setWinInput(e.target.value)}
-              inputMode="decimal"
-              placeholder="wygrana"
-              className="w-24 rounded-lg border border-line bg-bg-deep px-2 py-1.5 text-right font-mono text-cream transition-colors placeholder:text-muted/40 focus:border-win"
-            />
-          </form>
         )}
       </td>
 

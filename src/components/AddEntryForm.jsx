@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
 
-const empty = { name: '', bet: '' }
+// 0.2 to najczęstszy bet w naszych huntach — mniej klikania, wciąż edytowalne
+const DEFAULT_BET = '0.2'
+const empty = { name: '', bet: DEFAULT_BET }
 
 export default function AddEntryForm({ onAdd, slotNames = [] }) {
   const [form, setForm] = useState(empty)
@@ -46,8 +48,9 @@ export default function AddEntryForm({ onAdd, slotNames = [] }) {
         <input
           value={form.bet}
           onChange={(e) => update('bet', e.target.value)}
+          onFocus={(e) => e.target.select()}
           inputMode="decimal"
-          placeholder="2.00"
+          placeholder="0.20"
           className="w-28 rounded-lg border border-line bg-bg-deep px-3 py-2 font-mono text-cream transition-colors placeholder:text-muted/50 focus:border-pink"
         />
       </div>
