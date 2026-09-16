@@ -268,15 +268,15 @@ export default function App() {
                     onRemove={handleRemoveParticipant}
                     onSetStartBalance={handleSetStartBalance}
                   />
+                  <EntryTable
+                    entries={activeHunt.entries}
+                    currency={activeHunt.currency}
+                    onAdd={handleAddEntry}
+                    onRecordWin={handleRecordWin}
+                    onDelete={handleDeleteEntry}
+                    onReopen={handleReopen}
+                  />
                 </SummaryBar>
-                <EntryTable
-                  entries={activeHunt.entries}
-                  currency={activeHunt.currency}
-                  onAdd={handleAddEntry}
-                  onRecordWin={handleRecordWin}
-                  onDelete={handleDeleteEntry}
-                  onReopen={handleReopen}
-                />
               </>
             )}
 

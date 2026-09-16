@@ -89,9 +89,9 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
 
 export default function EntryTable({ entries, currency, onAdd, onRecordWin, onDelete, onReopen }) {
   return (
-    <div className="rounded-2xl border border-line bg-bg-panel/60 shadow-panel">
+    <div className="mt-5 overflow-hidden rounded-xl border border-line/70 bg-bg-deep/40">
       {/* dorzucanie slota siedzi w tym samym kontenerze co lista */}
-      <div className="border-b border-line px-4 py-4 md:px-5">
+      <div className="border-b border-line/70 px-4 py-4">
         <AddEntryForm onAdd={onAdd} />
       </div>
 
