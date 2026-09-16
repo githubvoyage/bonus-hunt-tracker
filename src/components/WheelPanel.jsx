@@ -151,81 +151,81 @@ export default function WheelPanel({ currency = '€' }) {
         <span className="text-xs text-muted">Wpisz kwoty, ustaw szanse i zakręć losem</span>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[minmax(0,260px)_1fr]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative aspect-square w-full max-w-[260px]">
-            <div className="absolute left-1/2 -top-3 z-30 -translate-x-1/2">
-              <div className="h-0 w-0 border-x-[10px] border-x-transparent border-t-[18px] border-t-gold drop-shadow-[0_0_8px_rgba(255,197,49,.85)]" />
-            </div>
-
-            <div
-              className="absolute inset-0 rounded-full border-[6px] border-line-bright shadow-neon-pink"
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                transition: `transform ${SPIN_MS}ms cubic-bezier(.17,.67,.09,1)`,
-                overflow: 'hidden',
-                backgroundColor: '#1B1035',
-                backgroundImage: background ? `url(${background})` : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            >
-              <div
-                className="absolute inset-0"
-                style={{ background: conicGradient, opacity: background ? 0.82 : 1 }}
-              />
-              {segments.map((s) => {
-                const flip = s.midDeg > 90 && s.midDeg < 270
-                return (
-                  <div
-                    key={s.id}
-                    className="absolute inset-0"
-                    style={{ transform: `rotate(${s.midDeg}deg)` }}
-                  >
-                    <div
-                      className="absolute left-1/2 top-[9%] -translate-x-1/2 whitespace-nowrap"
-                      style={{ transform: flip ? 'rotate(180deg)' : undefined }}
-                    >
-                      <span className="font-display text-[11px] text-bg drop-shadow-[0_1px_1px_rgba(255,255,255,.35)]">
-                        {formatMoney(s.amount, currency)}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="absolute left-1/2 top-1/2 z-20 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-gold bg-bg-panel text-xl shadow-neon-gold">
-              🎰
-            </div>
+      <div className="flex flex-col items-center gap-5">
+        <div className="relative aspect-square w-full max-w-[560px]">
+          <div className="absolute left-1/2 -top-4 z-30 -translate-x-1/2">
+            <div className="h-0 w-0 border-x-[16px] border-x-transparent border-t-[28px] border-t-gold drop-shadow-[0_0_10px_rgba(255,197,49,.9)]" />
           </div>
 
-          <button
-            onClick={handleSpin}
-            disabled={spinning || segments.length < 2}
-            className="btn-jazda w-full rounded-xl px-6 py-3 font-display text-sm uppercase tracking-wider text-bg shadow-neon-pink transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:animate-none disabled:opacity-40 disabled:hover:scale-100"
+          <div
+            className="absolute inset-0 rounded-full border-[8px] border-line-bright shadow-neon-pink"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: `transform ${SPIN_MS}ms cubic-bezier(.17,.67,.09,1)`,
+              overflow: 'hidden',
+              backgroundColor: '#1B1035',
+              backgroundImage: background ? `url(${background})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
           >
-            {spinning ? '🎡 Kręci się...' : '🎯 KRĘĆ!'}
-          </button>
-          {segments.length < 2 && (
-            <p className="text-center text-xs text-muted/70">
-              Dorzuć minimum dwie kwoty, żeby było co losować.
-            </p>
-          )}
+            <div
+              className="absolute inset-0"
+              style={{ background: conicGradient, opacity: background ? 0.42 : 1 }}
+            />
+            {segments.map((s) => {
+              const flip = s.midDeg > 90 && s.midDeg < 270
+              return (
+                <div
+                  key={s.id}
+                  className="absolute inset-0"
+                  style={{ transform: `rotate(${s.midDeg}deg)` }}
+                >
+                  <div
+                    className="absolute left-1/2 top-[9%] -translate-x-1/2 whitespace-nowrap"
+                    style={{ transform: flip ? 'rotate(180deg)' : undefined }}
+                  >
+                    <span className="font-display text-lg text-bg drop-shadow-[0_1px_2px_rgba(255,255,255,.4)] md:text-2xl">
+                      {formatMoney(s.amount, currency)}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
 
-          {winner && !spinning && (
-            <div className="pulse-glow w-full rounded-xl border border-gold bg-gold/10 px-4 py-3 text-center shadow-neon-gold">
-              <div className="font-display text-[10px] uppercase tracking-wider text-muted">
-                🔥 Wylosowano
-              </div>
-              <div className="mt-1 font-display text-2xl text-gold neon-gold">
-                {formatMoney(winner.amount, currency)}
-              </div>
-            </div>
-          )}
+          <div className="absolute left-1/2 top-1/2 z-20 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-gold bg-bg-panel text-3xl shadow-neon-gold md:h-24 md:w-24 md:text-4xl">
+            🎰
+          </div>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <button
+          onClick={handleSpin}
+          disabled={spinning || segments.length < 2}
+          className="btn-jazda w-full max-w-[560px] rounded-xl px-6 py-4 font-display text-lg uppercase tracking-wider text-bg shadow-neon-pink transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:animate-none disabled:opacity-40 disabled:hover:scale-100"
+        >
+          {spinning ? '🎡 Kręci się...' : '🎯 KRĘĆ!'}
+        </button>
+        {segments.length < 2 && (
+          <p className="text-center text-xs text-muted/70">
+            Dorzuć minimum dwie kwoty, żeby było co losować.
+          </p>
+        )}
+
+        {winner && !spinning && (
+          <div className="pulse-glow w-full max-w-[560px] rounded-xl border border-gold bg-gold/10 px-4 py-3 text-center shadow-neon-gold">
+            <div className="font-display text-[10px] uppercase tracking-wider text-muted">
+              🔥 Wylosowano
+            </div>
+            <div className="mt-1 font-display text-3xl text-gold neon-gold">
+              {formatMoney(winner.amount, currency)}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3 border-t border-line pt-5">
+        <div className="flex flex-wrap items-end gap-3">
           <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1.5">
               <label className={labelCls}>Kwota</label>
@@ -234,82 +234,78 @@ export default function WheelPanel({ currency = '€' }) {
                 onChange={(e) => setAmount(e.target.value)}
                 inputMode="decimal"
                 placeholder="20.00"
-                className={`w-28 font-mono ${inputCls}`}
+                className={`w-24 font-mono ${inputCls}`}
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelCls}>Waga (szansa)</label>
+              <label className={labelCls}>Waga</label>
               <input
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 inputMode="decimal"
                 placeholder="1"
-                className={`w-20 font-mono ${inputCls}`}
+                className={`w-16 font-mono ${inputCls}`}
               />
             </div>
             <button
               type="submit"
-              className="rounded-lg bg-violet px-5 py-2.5 font-display text-xs uppercase tracking-wider text-cream shadow-neon-pink transition-transform hover:scale-105"
+              className="rounded-lg bg-violet px-4 py-2 font-display text-xs uppercase tracking-wider text-cream shadow-neon-pink transition-transform hover:scale-105"
             >
-              + Dorzuć kwotę
+              + Dorzuć
             </button>
           </form>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="cursor-pointer rounded-lg border border-line px-3 py-2 text-xs font-semibold text-muted transition-all hover:border-violet hover:text-violet">
-              🖼️ Tło koła
-              <input type="file" accept="image/*" onChange={handleBackgroundFile} className="hidden" />
-            </label>
-            {background && (
-              <button
-                onClick={() => setBackground(null)}
-                className="rounded-lg border border-transparent px-3 py-2 text-xs font-semibold text-muted transition-all hover:border-loss hover:text-loss"
-              >
-                Usuń tło
-              </button>
-            )}
-          </div>
-
-          {segments.length === 0 ? (
-            <p className="text-sm text-muted/70">
-              Pusto jak w portfelu. Dorzuć kwoty, które chcecie wrzucić do losowania.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {segments.map((s) => (
-                <div
-                  key={s.id}
-                  className="flex items-center gap-3 rounded-lg border border-line bg-bg-deep/60 px-3 py-2"
-                >
-                  <span
-                    className="h-3 w-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: s.color }}
-                  />
-                  <span className="flex-1 font-mono text-cream">
-                    {formatMoney(s.amount, currency)}
-                  </span>
-                  <input
-                    value={s.weight}
-                    onChange={(e) => handleWeightChange(s.id, e.target.value)}
-                    inputMode="decimal"
-                    title="Waga"
-                    className="w-16 rounded-md border border-line bg-bg-panel px-2 py-1 text-right font-mono text-xs text-cream focus:border-violet"
-                  />
-                  <span className="w-14 text-right font-mono text-xs text-muted">
-                    {s.percent.toFixed(1)}%
-                  </span>
-                  <button
-                    onClick={() => handleRemove(s.id)}
-                    className="text-muted transition-colors hover:text-loss"
-                    title="Usuń kwotę"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+          <label className="cursor-pointer rounded-lg border border-line px-3 py-2 text-xs font-semibold text-muted transition-all hover:border-violet hover:text-violet">
+            🖼️ Tło koła
+            <input type="file" accept="image/*" onChange={handleBackgroundFile} className="hidden" />
+          </label>
+          {background && (
+            <button
+              onClick={() => setBackground(null)}
+              className="rounded-lg border border-transparent px-3 py-2 text-xs font-semibold text-muted transition-all hover:border-loss hover:text-loss"
+            >
+              Usuń tło
+            </button>
           )}
         </div>
+
+        {segments.length === 0 ? (
+          <p className="text-sm text-muted/70">
+            Pusto jak w portfelu. Dorzuć kwoty, które chcecie wrzucić do losowania.
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {segments.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center gap-2 rounded-full border border-line bg-bg-deep/60 py-1 pl-3 pr-2"
+              >
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: s.color }}
+                />
+                <span className="font-mono text-sm text-cream">
+                  {formatMoney(s.amount, currency)}
+                </span>
+                <input
+                  value={s.weight}
+                  onChange={(e) => handleWeightChange(s.id, e.target.value)}
+                  inputMode="decimal"
+                  title="Waga"
+                  className="w-12 rounded-md border border-line bg-bg-panel px-1.5 py-0.5 text-right font-mono text-xs text-cream focus:border-violet"
+                />
+                <span className="font-mono text-xs text-muted">{s.percent.toFixed(0)}%</span>
+                <button
+                  onClick={() => handleRemove(s.id)}
+                  className="ml-0.5 text-muted transition-colors hover:text-loss"
+                  title="Usuń kwotę"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
