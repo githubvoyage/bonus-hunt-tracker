@@ -13,17 +13,28 @@ export default function EditableValue({ value, onCommit, guard, className, ...re
     setDraft(String(value ?? ''))
   }, [value])
 
+  function handleBlur() {
+    const original = String(value ?? '')
+    if (draft === original) return // nic się nie zmieniło, nie ma o co pytać
+
+    // guard() pyta „na pewno?", gdy edycja wymaga potwierdzenia (np. hunt już
+    // zakończony). Robimy to na blur, a nie na focus — confirm() na focusie
+    // wywołuje w przeglądarkach pętlę: dialog zabiera focus, po zamknięciu
+    // przeglądarka oddaje focus z powrotem na to samo pole, co odpala focus
+    // (i confirm()) jeszcze raz w nieskończoność.
+    if (guard && !guard()) {
+      setDraft(original) // cofnij wpisaną zmianę
+      return
+    }
+    onCommit(draft)
+  }
+
   return (
     <input
       {...rest}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
-      onFocus={(e) => {
-        // guard() pyta „na pewno?", gdy edycja wymaga potwierdzenia (np. hunt
-        // już zakończony) — odmowa od razu zabiera focus, zanim ktoś zdąży pisać
-        if (guard && !guard()) e.target.blur()
-      }}
-      onBlur={() => onCommit(draft)}
+      onBlur={handleBlur}
       onKeyDown={(e) => {
         if (e.key === 'Enter') e.currentTarget.blur()
       }}
