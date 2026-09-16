@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
 import { formatMoney, formatMult } from '../calc.js'
+import EditableValue from './EditableValue.jsx'
 
 function Stat({ label, value, tone, big }) {
   const toneClass =
@@ -18,36 +18,6 @@ function Stat({ label, value, tone, big }) {
         {value}
       </span>
     </div>
-  )
-}
-
-/**
- * Pole, które wygląda jak reszta statystyk, dopóki się w nie nie kliknie.
- * Trzyma własny tekst, żeby dało się wpisać „12.” w drodze do „12.50”,
- * i oddaje wartość dopiero przy wyjściu z pola albo Enterze.
- */
-function EditableValue({ value, onCommit, className, ...rest }) {
-  const [draft, setDraft] = useState(String(value ?? ''))
-
-  useEffect(() => {
-    setDraft(String(value ?? ''))
-  }, [value])
-
-  function commit() {
-    onCommit(draft)
-  }
-
-  return (
-    <input
-      {...rest}
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') e.currentTarget.blur()
-      }}
-      className={`rounded-lg border border-dashed border-line-bright/70 bg-bg-deep/40 px-2 py-0.5 outline-none transition-colors hover:border-gold/70 focus:border-solid focus:border-gold focus:bg-bg-deep ${className}`}
-    />
   )
 }
 

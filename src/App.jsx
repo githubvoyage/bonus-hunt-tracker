@@ -153,6 +153,13 @@ export default function App() {
     updateActiveHunt((h) => ({ ...h, entries: h.entries.filter((e) => e.id !== id) }))
   }
 
+  function handleSetBet(id, betValue) {
+    updateActiveHunt((h) => ({
+      ...h,
+      entries: h.entries.map((e) => (e.id === id ? { ...e, bet: Number(betValue) || 0 } : e)),
+    }))
+  }
+
   function handleRecordWin(id, winValue) {
     updateActiveHunt((h) => ({
       ...h,
@@ -272,6 +279,7 @@ export default function App() {
                     entries={activeHunt.entries}
                     currency={activeHunt.currency}
                     onAdd={handleAddEntry}
+                    onSetBet={handleSetBet}
                     onRecordWin={handleRecordWin}
                     onDelete={handleDeleteEntry}
                     onReopen={handleReopen}

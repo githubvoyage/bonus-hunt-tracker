@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { entryMultiplier, formatMoney, formatMult } from '../calc.js'
 import AddEntryForm from './AddEntryForm.jsx'
+import EditableValue from './EditableValue.jsx'
 
-function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
+function Row({ entry, currency, index, onSetBet, onRecordWin, onDelete, onReopen }) {
   const [winInput, setWinInput] = useState('')
   const mult = entryMultiplier(entry)
   const mega = mult !== null && mult >= 50
@@ -35,7 +36,17 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
       </td>
 
       <td className="py-3 pr-3 text-right font-mono text-cream">
-        {formatMoney(entry.bet, currency)}
+        <div className="flex items-baseline justify-end gap-1">
+          <span className="text-muted">{currency}</span>
+          <EditableValue
+            value={entry.bet}
+            onCommit={(v) => onSetBet(entry.id, v)}
+            inputMode="decimal"
+            placeholder="0"
+            title="Kliknij i popraw bet"
+            className="w-20 text-right font-mono text-cream"
+          />
+        </div>
       </td>
 
       <td className="py-3 pr-3 text-right font-mono">
@@ -87,7 +98,15 @@ function Row({ entry, currency, index, onRecordWin, onDelete, onReopen }) {
   )
 }
 
-export default function EntryTable({ entries, currency, onAdd, onRecordWin, onDelete, onReopen }) {
+export default function EntryTable({
+  entries,
+  currency,
+  onAdd,
+  onSetBet,
+  onRecordWin,
+  onDelete,
+  onReopen,
+}) {
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-line/70 bg-bg-deep/40">
       {/* dorzucanie slota siedzi w tym samym kontenerze co lista */}
@@ -123,6 +142,7 @@ export default function EntryTable({ entries, currency, onAdd, onRecordWin, onDe
                   entry={entry}
                   currency={currency}
                   index={i}
+                  onSetBet={onSetBet}
                   onRecordWin={onRecordWin}
                   onDelete={onDelete}
                   onReopen={onReopen}

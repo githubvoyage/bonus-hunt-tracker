@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { formatMoney } from '../calc.js'
 import NewHuntButton from './NewHuntButton.jsx'
 
@@ -15,10 +16,29 @@ export default function HuntHeader({
 }) {
   const activeHunt = hunts.find((h) => h.id === activeId) || null
 
+  // Na telefonie cały nagłówek zabierałby po zjechaniu prawie pół ekranu,
+  // więc logo i bilans chowają się, a zostaje sam pasek do klikania.
+  const [compact, setCompact] = useState(false)
+
+  useEffect(() => {
+    function onScroll() {
+      setCompact(window.scrollY > 40)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <div className="space-y-4 border-b border-line pb-5">
+    // przykleja się do góry przy scrollu, żeby przełączanie huntów i bilans
+    // były pod ręką także w połowie długiej listy slotów
+    <div
+      className={`sticky top-0 z-20 -mx-4 space-y-4 border-b border-line bg-bg px-4 shadow-lg shadow-bg/80 md:-mx-10 md:px-10 md:py-4 ${
+        compact ? 'py-2' : 'py-4'
+      }`}
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className={`flex-wrap items-center gap-3 ${compact ? 'hidden md:flex' : 'flex'}`}>
           <span className="text-3xl blink">🎰</span>
           <h1 className="font-display text-xl leading-none text-gold neon-gold md:text-3xl">
             BONUS HUNT
@@ -93,6 +113,8 @@ export default function HuntHeader({
                 onClick={onFinish}
                 disabled={sendingSummary}
                 className={`rounded-lg border px-3 py-2 font-semibold transition-all disabled:cursor-wait disabled:opacity-60 ${
+                  compact ? 'hidden md:block' : ''
+                } ${
                   activeHunt?.finished
                     ? 'border-win/50 text-win hover:border-win hover:shadow-neon-win'
                     : 'border-line text-muted hover:border-win hover:text-win'
@@ -111,7 +133,9 @@ export default function HuntHeader({
             {activeId && (
               <button
                 onClick={() => onDelete(activeId)}
-                className="rounded-lg border border-transparent px-3 py-2 font-semibold text-muted transition-all hover:border-loss hover:text-loss"
+                className={`rounded-lg border border-transparent px-3 py-2 font-semibold text-muted transition-all hover:border-loss hover:text-loss ${
+                  compact ? 'hidden md:block' : ''
+                }`}
               >
                 🗑 Usuń hunta
               </button>

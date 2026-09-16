@@ -66,6 +66,7 @@ src/
     SummaryBar.jsx         całe okno hunta w tęczowej ramce: edytowalna nazwa/waluta/kasa na start, statystyki, pasek postępu, a jako podokna podział szmalu i lista slotów
     ParticipantsPanel.jsx  „Podział szmalu”: podokno SummaryBara; domyślnie sam wynik, dodawanie i zmiany pod przyciskiem edycji
     AddEntryForm.jsx       rząd pól do dodania slota (renderowany w EntryTable, nie osobno)
+    EditableValue.jsx      pole edytowane w miejscu (przerywana ramka, commit na Enter/blur)
     EntryTable.jsx         podokno SummaryBara: dodawanie slota na górze + tabela slotów z wpisywaniem wygranych
     WheelPanel.jsx         koło zrzutki: losowanie kwoty wpłaty z wagami i konfetti
 ```
